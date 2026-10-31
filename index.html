@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Lucia · 出行，不必慌张 — iOS 高保真原型</title>
-<meta name="description" content="Lucia 是一款 AI 旅行助手 iOS 原型：行前清单、可拖拽的城市漫步、分类社区、拍照翻译与全局助手。22 个高保真界面预览。">
+<title>Lucia · 出行，不必慌张 — iOS App 下载</title>
+<meta name="description" content="Lucia 是原生 SwiftUI 旅行助手（iOS 18+）：行前清单、可拖拽的城市漫步、一页一主题的社区、拍照翻译与全局 AI 助手。这里提供真机安装包下载和 22 个界面预览。">
 <meta name="theme-color" content="#F4ECDC">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23DDEB86' stroke='%23191710' stroke-width='3'/%3E%3Ctext x='32' y='43' font-family='Helvetica,Arial' font-size='30' font-weight='900' text-anchor='middle' fill='%23191710'%3EL%3C/text%3E%3C/svg%3E">
 <style>
@@ -73,6 +73,45 @@
   }
   .gh-btn:hover{transform:translate(1px,1px);box-shadow:1px 1px 0 rgba(25,23,16,.9)}
   .gh-btn svg{width:13px;height:13px}
+
+  /* ---------- install ---------- */
+  section[id]{scroll-margin-top:86px}
+  .install{padding-top:clamp(34px,4.4vw,60px);padding-bottom:clamp(30px,4vw,52px)}
+  .install-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:clamp(20px,2.6vw,30px)}
+  .install-head h2{margin:10px 0 0}
+  .install-head p{max-width:430px;color:var(--ink2);font-size:13.5px;line-height:1.8;margin:0}
+  .install-grid{display:grid;grid-template-columns:1.02fr .98fr;gap:clamp(18px,2.6vw,28px);align-items:stretch}
+  .dl-card{
+    position:relative;overflow:hidden;display:flex;flex-direction:column;
+    background:var(--ink);color:var(--paper);border:1.4px solid var(--ink);
+    border-radius:26px;padding:clamp(22px,2.8vw,32px);
+    box-shadow:6px 6px 0 var(--lime);
+  }
+  .dl-card:before{
+    content:"";position:absolute;right:-60px;top:-70px;width:230px;height:230px;border-radius:50%;
+    background:radial-gradient(circle at 30% 30%, rgba(221,235,134,.34), rgba(221,235,134,0) 68%);
+  }
+  .dl-top{display:flex;align-items:center;gap:14px;position:relative}
+  .dl-icon{width:64px;height:64px;border-radius:16px;border:1.4px solid rgba(255,252,242,.45);box-shadow:3px 3px 0 rgba(221,235,134,.85);flex:none;object-fit:cover}
+  .dl-name{font-size:19px;font-weight:900;letter-spacing:-.02em}
+  .dl-sub{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;color:rgba(255,252,242,.6);margin-top:5px;text-transform:uppercase}
+  .dl-claim{font-size:14.5px;line-height:1.75;color:rgba(255,252,242,.86);margin:20px 0 0;position:relative}
+  .dl-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px;position:relative}
+  .dl-actions .btn{box-shadow:3px 3px 0 rgba(255,252,242,.38)}
+  .dl-actions .btn-lime{box-shadow:3px 3px 0 rgba(255,252,242,.45)}
+  .dl-meta{margin-top:auto;padding-top:22px;position:relative}
+  .dl-hash{font-family:var(--mono);font-size:9px;letter-spacing:.04em;color:rgba(255,252,242,.48);word-break:break-all;line-height:1.7;margin-top:10px}
+  .dl-badge{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);background:var(--lime);border:1.2px solid var(--ink);border-radius:999px;padding:5px 10px}
+  .steps{background:var(--paper);border:1.3px solid var(--ink);border-radius:26px;padding:clamp(22px,2.8vw,32px);box-shadow:var(--shadow-hard);display:flex;flex-direction:column}
+  .steps-eyebrow{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3)}
+  .steps ol{list-style:none;margin:18px 0 0;padding:0;display:grid;gap:14px}
+  .steps li{display:grid;grid-template-columns:26px 1fr;gap:12px;font-size:13px;line-height:1.65;color:var(--ink2)}
+  .steps li b{color:var(--ink);font-weight:800}
+  .steps li .n{width:26px;height:26px;border-radius:50%;background:var(--lime);border:1.2px solid var(--ink);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink)}
+  .steps-note{margin-top:20px;padding:12px 14px;border-radius:14px;background:var(--mustard-soft);border:1.1px solid var(--ink);font-size:11.5px;line-height:1.7;color:var(--ink2)}
+  .steps-alt{margin-top:auto;padding-top:16px;font-size:11.5px;line-height:1.7;color:var(--ink3)}
+  .steps-alt a{color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+  @media(max-width:900px){.install-grid{grid-template-columns:1fr}.dl-card{box-shadow:4px 4px 0 var(--lime)}}
 
   /* ---------- hero ---------- */
   .hero{
@@ -402,6 +441,7 @@
     <span class="brand-dot" aria-hidden="true"></span>
   </a>
   <nav class="topnav" aria-label="页面导航">
+    <a href="#install">安装</a>
     <a href="#tour">界面</a>
     <a href="#system">设计语言</a>
     <a href="#screens">全部屏幕</a>
@@ -418,15 +458,15 @@
     <div class="hero-copy">
       <div class="eyebrow">LUCIA TRAVEL · iOS 18+ · 2026.10</div>
       <h1>把一趟北京<br><span class="accent">装进口袋。</span></h1>
-      <p class="lede">行前清单、可拖动点位的城市漫步、一页一个主题的社区频道、能拍菜单和路牌的翻译，还有随叫随到的 <strong style="white-space:nowrap">AI 助手</strong>。所有界面都装进一套奶油纸色的设计里。</p>
+      <p class="lede">行前清单、可拖动点位的城市漫步、一页一个主题的社区频道、能拍菜单和路牌的翻译，还有随叫随到的 <strong style="white-space:nowrap">AI 助手</strong>。这是能装进 iPhone 的原生 App，不是概念图。</p>
       <div class="hero-actions">
-        <a class="btn btn-lime" href="#tour">浏览 22 个界面 <span class="arrow">↓</span></a>
-        <a class="btn" href="#screens">全部截图</a>
+        <a class="btn btn-lime" href="#install">下载 iOS 安装包 <span class="arrow">↓</span></a>
+        <a class="btn" href="#tour">浏览 22 个界面</a>
       </div>
       <ul class="hero-meta">
-        <li>22 个高保真界面</li>
-        <li>5 个主 Tab</li>
-        <li>静态网页预览</li>
+        <li>原生 SwiftUI · iOS 18+</li>
+        <li>未签名 IPA · 侧载</li>
+        <li>22 个界面实拍</li>
       </ul>
     </div>
     <div class="hero-stage" aria-hidden="true">
@@ -435,6 +475,47 @@
       <span class="sticker sticker-a">High-fidelity</span>
       <span class="sticker sticker-b">5 Tabs · 1 Orb</span>
       <span class="sticker sticker-c">iOS 27 Sim</span>
+    </div>
+  </section>
+
+  <!-- INSTALL -->
+  <section class="wrap install" id="install">
+    <div class="install-head">
+      <div>
+        <div class="eyebrow">00 / Install</div>
+        <h2>装到 iPhone 上，<span class="scribble">不是在浏览器里看。</span></h2>
+      </div>
+      <p>GitHub Pages 只能托管静态文件，跑不了原生 App。所以这个页面是分发入口和界面预览，真正的应用在下面这个安装包里。</p>
+    </div>
+    <div class="install-grid">
+      <div class="dl-card">
+        <div class="dl-top">
+          <img class="dl-icon" src="shots/app-icon.png" alt="Lucia 应用图标" width="64" height="64">
+          <div>
+            <div class="dl-name">Lucia 1.0.0</div>
+            <div class="dl-sub">iOS 18+ · arm64 · 1.5 MB</div>
+          </div>
+        </div>
+        <p class="dl-claim">五个 Tab、可拖动的 Citywalk 点位、一页一主题的社区频道、拍照即译，和随叫随到的助手，全都在这个包里。</p>
+        <div class="dl-actions">
+          <a class="btn btn-lime" href="https://github.com/wangwangbobo/lucia-travel/releases/download/v1.0.0/Lucia-1.0.0-unsigned.ipa">下载 .ipa <span class="arrow">↓</span></a>
+          <a class="btn" href="https://github.com/wangwangbobo/lucia-travel/releases/tag/v1.0.0" target="_blank" rel="noopener">Release 页</a>
+        </div>
+        <div class="dl-meta">
+          <span class="dl-badge">Unsigned · Sideload</span>
+          <div class="dl-hash">SHA-256 7a75cc55…26eca</div>
+        </div>
+      </div>
+      <div class="steps">
+        <div class="steps-eyebrow">侧载安装 · 大约 3 分钟</div>
+        <ol>
+          <li><span class="n">1</span><span>在 Mac 或 Windows 上装好 <b>Sideloadly</b>，用数据线连上 iPhone。</span></li>
+          <li><span class="n">2</span><span>把下载的 ipa 拖进 Sideloadly，填入自己的 Apple ID，点 Start 重新签名。</span></li>
+          <li><span class="n">3</span><span>手机打开 设置 → 通用 → VPN 与设备管理，信任证书，回桌面打开 Lucia。</span></li>
+        </ol>
+        <div class="steps-note">免费 Apple ID 的签名 7 天有效，到期重签一次即可；付费开发者账号能签一年。不想用侧载工具的话，也可以拿 Xcode 直接编译到手机。</div>
+        <div class="steps-alt">源码在仓库的 <a href="https://github.com/wangwangbobo/lucia-travel/tree/main/ios" target="_blank" rel="noopener">ios/</a> 目录，<a href="ios/README.md">构建说明</a> 也在里面。</div>
+      </div>
     </div>
   </section>
 
