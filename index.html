@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lucia · 出行，不必慌张 — iOS 高保真原型</title>
+<meta name="description" content="Lucia 是一款 AI 旅行助手 iOS 原型：行前清单、城市漫步、实时翻译、社区路线与全局助手。12 个高保真界面预览。">
+<meta name="theme-color" content="#F4ECDC">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23DDEB86' stroke='%23191710' stroke-width='3'/%3E%3Ctext x='32' y='43' font-family='Helvetica,Arial' font-size='30' font-weight='900' text-anchor='middle' fill='%23191710'%3EL%3C/text%3E%3C/svg%3E">
+<style>
+  :root{
+    --bg:#F4ECDC;
+    --paper:#FFFCF2;
+    --paper-warm:#F9F0DC;
+    --ink:#191710;
+    --ink2:#534D3F;
+    --ink3:#8D8471;
+    --line:#CFC0A5;
+    --line-soft:#E6D9C2;
+    --accent:#EE5B34;
+    --lime:#DDEB86;
+    --lime-soft:#EFF6CD;
+    --mustard:#F2C14E;
+    --mustard-soft:#FBE9B8;
+    --pink:#F3B1C6;
+    --pink-soft:#FBE0E7;
+    --peri:#8CA3E8;
+    --peri-soft:#E4E9FB;
+    --mint:#B7DFC0;
+    --mint-soft:#E4F3E6;
+    --sky:#BADCF0;
+    --sky-soft:#E5F2FA;
+    --lavender:#C9C2EE;
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,"Roboto Mono",monospace;
+    --sans:"PingFang SC","Hiragino Sans GB",-apple-system,BlinkMacSystemFont,"Helvetica Neue","Noto Sans SC",sans-serif;
+    --shadow-hard:3px 3px 0 var(--ink);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);
+    font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+    overflow-x:hidden;
+  }
+  img{max-width:100%;height:auto}
+  a{color:inherit}
+  button{font-family:inherit}
+  ::selection{background:var(--lime);color:var(--ink)}
+  .wrap{max-width:1280px;margin:0 auto;padding-left:clamp(20px,4vw,48px);padding-right:clamp(20px,4vw,48px)}
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    position:sticky;top:0;z-index:50;
+    display:flex;align-items:center;gap:26px;
+    padding:13px clamp(20px,4vw,48px);
+    background:rgba(244,236,220,.88);
+    -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
+    border-bottom:1.2px solid var(--ink);
+  }
+  .brand{display:flex;align-items:center;gap:9px;text-decoration:none;font-weight:900;font-size:19px;letter-spacing:-.02em}
+  .brand-mark{width:29px;height:29px;border-radius:50%;background:var(--lime);border:1.3px solid var(--ink);display:grid;place-items:center;font-size:13px;font-weight:900;line-height:1}
+  .brand-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block}
+  .topnav{margin-left:auto;display:flex;gap:22px;font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase}
+  .topnav a{color:var(--ink2);text-decoration:none;padding:5px 0;border-bottom:1.5px solid transparent;transition:color .15s,border-color .15s}
+  .topnav a:hover{color:var(--ink);border-color:var(--ink)}
+  .gh-btn{
+    display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 14px;
+    border:1.2px solid var(--ink);border-radius:999px;background:var(--paper);
+    font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-decoration:none;
+    box-shadow:2px 2px 0 rgba(25,23,16,.9);transition:transform .15s,box-shadow .15s;
+  }
+  .gh-btn:hover{transform:translate(1px,1px);box-shadow:1px 1px 0 rgba(25,23,16,.9)}
+  .gh-btn svg{width:13px;height:13px}
+
+  /* ---------- hero ---------- */
+  .hero{
+    position:relative;
+    display:grid;grid-template-columns:minmax(0,1.06fr) minmax(0,.94fr);
+    gap:clamp(24px,4vw,60px);align-items:center;
+    padding-top:clamp(42px,5.5vw,76px);padding-bottom:clamp(54px,6vw,86px);
+  }
+  .hero>*{min-width:0}
+  .hero:before{
+    content:"";position:absolute;z-index:-1;
+    width:560px;height:560px;right:-140px;top:-80px;border-radius:50%;
+    background:radial-gradient(circle at 40% 40%,rgba(186,220,240,.55),rgba(186,220,240,0) 68%);
+  }
+  .hero:after{
+    content:"";position:absolute;z-index:-1;
+    width:420px;height:420px;left:-160px;bottom:-120px;border-radius:50%;
+    background:radial-gradient(circle at 60% 40%,rgba(243,177,198,.45),rgba(243,177,198,0) 70%);
+  }
+  .eyebrow{
+    display:flex;align-items:center;gap:10px;
+    font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--ink3);
+  }
+  .eyebrow:before{content:"";width:24px;height:1.2px;background:var(--ink3)}
+  .hero h1{
+    font-size:clamp(50px,6.6vw,88px);
+    line-height:.99;letter-spacing:-.045em;font-weight:900;
+    margin:20px 0 22px;
+  }
+  .hero h1 .accent{color:var(--accent)}
+  .lede{font-size:15px;line-height:1.85;color:var(--ink2);max-width:452px;margin:0}
+  .lede strong{color:var(--ink);font-weight:700}
+  .hero-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+  .btn{
+    display:inline-flex;align-items:center;gap:10px;height:48px;padding:0 22px;
+    border:1.3px solid var(--ink);border-radius:999px;background:var(--paper);
+    color:var(--ink);text-decoration:none;font-size:13px;font-weight:700;
+    box-shadow:var(--shadow-hard);transition:transform .15s,box-shadow .15s;
+  }
+  .btn:hover{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+  .btn-lime{background:var(--lime)}
+  .btn .arrow{font-size:14px;line-height:1}
+  .hero-meta{
+    display:flex;flex-wrap:wrap;list-style:none;gap:0;padding:0;margin:34px 0 0;
+    font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;color:var(--ink3);text-transform:uppercase;
+  }
+  .hero-meta li{display:flex;align-items:center}
+  .hero-meta li+li:before{content:"";width:4px;height:4px;border-radius:50%;background:var(--line);margin:0 12px}
+  .hero-stage{position:relative;min-height:650px;display:flex;align-items:center;justify-content:center}
+  .phone{
+    position:relative;background:var(--paper);
+    border:2px solid var(--ink);border-radius:52px;padding:8px;
+    box-shadow:16px 18px 0 rgba(25,23,16,.12),0 34px 70px rgba(25,23,16,.18);
+  }
+  .phone:before,.phone:after{content:"";position:absolute;background:var(--ink);border-radius:2px}
+  .phone:before{width:3px;height:56px;left:-5px;top:132px}
+  .phone:after{width:3px;height:76px;right:-5px;top:158px}
+  .phone img{display:block;width:100%;border-radius:43px;background:var(--bg)}
+  .phone-back{position:absolute;width:min(252px,calc(100vw - 140px));transform:rotate(5.5deg) translate(72px,-6px);z-index:1;opacity:.96;filter:saturate(.86)}
+  .phone-back img{border-radius:43px}
+  .phone-front{width:min(304px,calc(100vw - 88px));transform:rotate(-2.5deg);z-index:2}
+  .sticker{
+    position:absolute;z-index:5;white-space:nowrap;
+    font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+    padding:7px 10px;border:1.2px solid var(--ink);border-radius:5px;
+    box-shadow:2px 2px 0 var(--ink);
+  }
+  .sticker-a{background:var(--lime);top:8px;left:-6px;transform:rotate(-7deg)}
+  .sticker-b{background:var(--pink);right:-8px;bottom:120px;transform:rotate(4deg)}
+  .sticker-c{background:var(--mustard);left:14px;bottom:38px;transform:rotate(-3deg)}
+
+  /* ---------- ticker ---------- */
+  .ticker{overflow:hidden;background:var(--ink);color:var(--paper);border-top:1.2px solid var(--ink);border-bottom:1.2px solid var(--ink)}
+  .ticker-track{display:flex;width:max-content;animation:tick 40s linear infinite}
+  .ticker-track span{
+    display:flex;align-items:center;gap:34px;padding:12px 34px 12px 0;
+    font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;white-space:nowrap;
+  }
+  .ticker-track i{font-style:normal;color:var(--lime);font-size:10px}
+  @keyframes tick{to{transform:translateX(-50%)}}
+
+  /* ---------- sections ---------- */
+  .section{padding-top:clamp(60px,7.5vw,104px);padding-bottom:clamp(60px,7.5vw,104px)}
+  .section-head{max-width:760px;margin-bottom:clamp(30px,3.6vw,48px)}
+  h2{font-size:clamp(30px,4.2vw,48px);line-height:1.12;letter-spacing:-.035em;font-weight:900;margin:16px 0 14px}
+  .section-head p{color:var(--ink2);font-size:14.5px;line-height:1.8;margin:0}
+  .scribble{position:relative;display:inline-block;color:var(--accent);white-space:nowrap}
+  .scribble:after{
+    content:"";position:absolute;left:-2px;right:-2px;bottom:-5px;height:8px;opacity:.9;
+    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='8' viewBox='0 0 26 8'%3E%3Cpath d='M1 5.2c4-4.4 8-4.4 12 0s8 4.4 12 0' fill='none' stroke='%23EE5B34' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") repeat-x;
+    background-size:26px 8px;
+  }
+
+  /* ---------- tour ---------- */
+  .tour-grid{display:grid;grid-template-columns:248px minmax(0,auto) minmax(0,1fr);gap:clamp(24px,4vw,58px);align-items:start}
+  .tour-grid>*{min-width:0}
+  .tour-list{position:sticky;top:86px;display:flex;flex-direction:column;gap:5px}
+  .tour-group{
+    display:flex;align-items:center;gap:9px;
+    font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink3);
+    margin:14px 0 4px;padding-left:2px;
+  }
+  .tour-group:first-child{margin-top:0}
+  .tour-group:after{content:"";flex:1;height:1px;background:var(--line-soft)}
+  .tour-btn{
+    display:flex;align-items:center;gap:9px;width:100%;
+    padding:8px 10px;border-radius:11px;border:1.2px solid transparent;background:transparent;
+    color:var(--ink);text-align:left;cursor:pointer;transition:background .15s,border-color .15s,transform .15s;
+  }
+  .tour-btn .num{font-family:var(--mono);font-size:9px;color:var(--ink3);width:19px;flex:none}
+  .tour-btn .name{font-size:13px;font-weight:700;letter-spacing:-.01em}
+  .tour-btn .en{margin-left:auto;font-family:var(--mono);font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);flex:none}
+  .tour-btn:hover{background:rgba(255,252,242,.7);border-color:var(--line)}
+  .tour-btn.active{background:var(--lime);border-color:var(--ink);box-shadow:2px 2px 0 rgba(25,23,16,.85)}
+  .tour-btn.active .num,.tour-btn.active .en{color:var(--ink2)}
+  .tour-stage{display:flex;flex-direction:column;align-items:center;gap:18px;position:sticky;top:86px}
+  .tour-phone{width:min(316px,68vw)}
+  .tour-phone img{aspect-ratio:1206/2622;object-fit:cover}
+  .tour-controls{display:flex;align-items:center;gap:14px;font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--ink3)}
+  .icon-btn{
+    width:38px;height:38px;border-radius:50%;border:1.3px solid var(--ink);background:var(--paper);
+    display:grid;place-items:center;cursor:pointer;color:var(--ink);
+    box-shadow:2px 2px 0 rgba(25,23,16,.9);transition:transform .15s,box-shadow .15s;
+  }
+  .icon-btn:hover{transform:translate(1px,1px);box-shadow:1px 1px 0 rgba(25,23,16,.9)}
+  .icon-btn svg{width:14px;height:14px}
+  .tour-info{padding-top:14px;align-self:center}
+  .tour-index{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;color:var(--ink3)}
+  .tour-info h3{font-size:clamp(24px,2.5vw,33px);font-weight:900;letter-spacing:-.03em;margin:10px 0 5px;line-height:1.15}
+  .tour-en{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink3)}
+  .tour-info p{font-size:13.5px;line-height:1.9;color:var(--ink2);margin:20px 0 22px;max-width:37ch}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{
+    font-size:10px;font-weight:600;letter-spacing:.01em;
+    padding:5px 10px;border:1px solid var(--ink);border-radius:999px;background:var(--paper);
+  }
+  .chip:nth-child(4n+1){background:var(--lime-soft)}
+  .chip:nth-child(4n+2){background:var(--pink-soft)}
+  .chip:nth-child(4n+3){background:var(--sky-soft)}
+  .chip:nth-child(4n+4){background:var(--mustard-soft)}
+  .tour-hint{margin-top:26px;font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:var(--ink3);display:flex;align-items:center;gap:7px}
+  .key{display:inline-grid;place-items:center;min-width:19px;height:19px;padding:0 4px;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;background:var(--paper);font-size:9px;color:var(--ink2)}
+
+  /* ---------- design system ---------- */
+  .system{background:var(--paper-warm);border-top:1.2px solid var(--ink);border-bottom:1.2px solid var(--ink)}
+  .system-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:18px}
+  .card{
+    background:var(--paper);border:1.3px solid var(--ink);border-radius:24px;padding:clamp(18px,2.2vw,26px);
+    box-shadow:5px 6px 0 rgba(25,23,16,.1);
+  }
+  .card-eyebrow{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink3);display:flex;justify-content:space-between;gap:10px}
+  .card-eyebrow span:last-child{color:var(--ink)}
+  .card h3{font-size:19px;font-weight:900;letter-spacing:-.02em;margin:10px 0 0}
+  .colors-card{grid-column:span 7}
+  .type-card{grid-column:span 5;background:var(--mustard-soft)}
+  .swatches{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-top:20px}
+  .swatch{min-width:0}
+  .swatch .block{height:52px;border:1.2px solid var(--ink);border-radius:11px}
+  .swatch b{display:block;font-size:9.5px;margin-top:7px;font-weight:700;letter-spacing:0}
+  .swatch small{display:block;font-family:var(--mono);font-size:8px;color:var(--ink3);margin-top:2px;letter-spacing:.03em}
+  .type-sample{font-size:clamp(26px,3vw,34px);font-weight:900;letter-spacing:-.04em;line-height:1.2;margin-top:22px}
+  .type-sample em{font-style:normal;color:var(--accent)}
+  .type-meta{font-family:var(--mono);font-size:8.5px;letter-spacing:.14em;color:var(--ink3);margin-top:10px;text-transform:uppercase}
+  .type-card p{font-size:12px;line-height:1.75;color:var(--ink2);margin:16px 0 0}
+  .mono-sample{font-family:var(--mono);font-size:9px;letter-spacing:.18em;color:var(--ink2);margin-top:16px;text-transform:uppercase}
+  .components-card{grid-column:span 12;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+  .demo{
+    position:relative;min-height:132px;padding:16px;border:1.1px solid var(--line);border-radius:16px;
+    background:rgba(244,236,220,.5);display:flex;flex-direction:column;justify-content:center;align-items:center;gap:12px;
+  }
+  .demo-label{position:absolute;left:12px;top:9px;font-family:var(--mono);font-size:7.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3)}
+  .demo-sticker{
+    font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    background:var(--mustard);border:1.1px solid var(--ink);border-radius:4px;padding:5px 8px;
+    box-shadow:2px 2px 0 rgba(25,23,16,.85);transform:rotate(-4deg);
+  }
+  .demo-btn{
+    font-size:11.5px;font-weight:700;padding:11px 20px;border-radius:999px;
+    background:var(--lime);border:1.2px solid var(--ink);box-shadow:3px 3px 0 rgba(25,23,16,.85);
+  }
+  .demo-tags{display:flex;flex-wrap:wrap;justify-content:center;gap:5px}
+  .demo-tag{font-size:8.5px;font-weight:600;padding:3px 8px;border-radius:999px;border:1px solid var(--ink);background:var(--paper)}
+  .demo-tag.pink{background:var(--pink-soft)}
+  .demo-tag.sky{background:var(--sky-soft)}
+  .ring{
+    width:64px;height:64px;border-radius:50%;border:1.2px solid var(--ink);
+    background:conic-gradient(var(--ink) 0 50%,rgba(255,252,242,.7) 50% 100%);
+    display:grid;place-items:center;position:relative;
+  }
+  .ring:before{content:"";position:absolute;inset:5px;border-radius:50%;background:var(--lime)}
+  .ring span{position:relative;font-size:12px;font-weight:900}
+
+  /* ---------- gallery ---------- */
+  .gallery-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap}
+  .gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(228px,1fr));gap:clamp(16px,2.2vw,24px)}
+  .shot{display:block;padding:0;border:0;background:transparent;cursor:zoom-in;text-align:left;color:var(--ink)}
+  .shot-frame{
+    border:1.4px solid var(--ink);border-radius:22px;background:var(--paper);padding:6px;
+    box-shadow:4px 5px 0 rgba(25,23,16,.1);transition:transform .2s ease,box-shadow .2s ease;
+  }
+  .shot img{display:block;width:100%;border-radius:17px}
+  .shot:hover .shot-frame{transform:translateY(-4px) rotate(-.7deg);box-shadow:7px 9px 0 rgba(25,23,16,.13)}
+  .shot-cap{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-top:9px;padding:0 2px}
+  .shot-cap b{font-size:12.5px;font-weight:700}
+  .shot-cap span{font-family:var(--mono);font-size:8px;letter-spacing:.12em;color:var(--ink3);text-transform:uppercase;white-space:nowrap}
+
+  /* ---------- footer ---------- */
+  footer{background:var(--ink);color:var(--paper);padding:clamp(46px,6vw,84px) 0 clamp(30px,4vw,48px)}
+  .footer-top{display:grid;grid-template-columns:1fr auto;gap:36px;align-items:end}
+  .footer-title{font-size:clamp(54px,9vw,112px);font-weight:900;letter-spacing:-.05em;line-height:.9;margin:0}
+  .footer-title em{font-style:normal;color:var(--lime)}
+  .footer-note{max-width:330px;font-size:12px;line-height:1.85;color:rgba(255,252,242,.58);margin:16px 0 0}
+  .footer-links{display:flex;flex-direction:column;align-items:flex-end;gap:10px;font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase}
+  .footer-links a{color:var(--paper);text-decoration:none;border-bottom:1px solid rgba(255,252,242,.35);padding:4px 0}
+  .footer-links a:hover{border-color:var(--lime);color:var(--lime)}
+  .footer-bottom{
+    display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;
+    margin-top:clamp(36px,5vw,64px);padding-top:20px;border-top:1px solid rgba(255,252,242,.16);
+    font-family:var(--mono);font-size:8.5px;letter-spacing:.13em;text-transform:uppercase;color:rgba(255,252,242,.45);
+  }
+  .footer-bottom .dot{color:var(--lime)}
+
+  /* ---------- lightbox ---------- */
+  .lightbox[hidden]{display:none}
+  .lightbox{
+    position:fixed;inset:0;z-index:100;background:rgba(25,23,16,.95);
+    display:grid;grid-template-columns:minmax(0,440px) minmax(0,300px);
+    gap:clamp(24px,4vw,60px);align-items:center;justify-content:center;
+    padding:clamp(20px,4vw,52px);color:var(--paper);
+  }
+  .lb-stage{display:flex;justify-content:center}
+  .lb-frame{
+    background:var(--paper);border:1.5px solid var(--paper);border-radius:28px;padding:5px;
+    max-height:88vh;display:flex;
+  }
+  .lb-frame img{display:block;max-height:calc(88vh - 10px);width:auto;border-radius:23px}
+  .lb-info{max-width:300px}
+  .lb-count{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:rgba(255,252,242,.5)}
+  .lb-info h3{font-size:clamp(24px,3vw,32px);font-weight:900;letter-spacing:-.03em;margin:12px 0 4px}
+  .lb-en{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,252,242,.5)}
+  .lb-info p{font-size:12.5px;line-height:1.85;color:rgba(255,252,242,.72);margin:16px 0 24px}
+  .lb-nav{display:flex;align-items:center;gap:10px}
+  .lb-close{
+    position:absolute;top:clamp(18px,3vw,30px);right:clamp(18px,3vw,30px);
+    width:40px;height:40px;border-radius:50%;border:1.2px solid var(--paper);background:transparent;
+    color:var(--paper);display:grid;place-items:center;cursor:pointer;
+  }
+  .lb-close:hover{background:var(--paper);color:var(--ink)}
+  .lb-nav .icon-btn{background:transparent;color:var(--paper);border-color:var(--paper);box-shadow:2px 2px 0 rgba(255,252,242,.35)}
+  .lb-nav .icon-btn:hover{background:var(--paper);color:var(--ink)}
+  .lb-nav .icon-btn svg{width:14px;height:14px}
+
+  /* ---------- responsive ---------- */
+  @media (max-width:1080px){
+    .tour-grid{grid-template-columns:220px minmax(0,1fr);gap:28px}
+    .tour-stage{position:static}
+    .tour-info{grid-column:1 / -1;display:grid;grid-template-columns:auto minmax(0,1fr);gap:0 32px;align-items:start;align-self:start}
+    .tour-info .tour-index{grid-column:1}
+    .tour-info h3{grid-column:1;margin-top:4px}
+    .tour-info .tour-en{grid-column:1}
+    .tour-info p{grid-column:2;grid-row:1 / span 3;margin:0 0 16px;max-width:none}
+    .tour-info .chips{grid-column:2}
+    .tour-hint{display:none}
+    .colors-card{grid-column:span 12}
+    .type-card{grid-column:span 12}
+  }
+  @media (max-width:900px){
+    .hero{grid-template-columns:1fr;padding-top:36px}
+    .hero-stage{min-height:0;margin-top:26px;padding:26px 0 36px}
+    .hero h1{font-size:clamp(46px,10vw,70px)}
+    .phone-front{width:min(270px,calc(100vw - 84px))}
+    .phone-back{width:min(224px,calc(100vw - 150px));transform:rotate(5deg) translate(56px,-4px)}
+    .sticker-a{left:2%}
+    .sticker-b{right:2%}
+    .sticker-c{left:6%}
+    .tour-grid{grid-template-columns:1fr;gap:22px}
+    .tour-list{position:static;flex-direction:row;overflow-x:auto;gap:7px;padding-bottom:6px;scrollbar-width:none}
+    .tour-list::-webkit-scrollbar{display:none}
+    .tour-group{display:none}
+    .tour-btn{width:auto;flex:none;padding:8px 12px;border:1.2px solid var(--line);background:var(--paper)}
+    .tour-btn .en{display:none}
+    .tour-btn .num{width:auto}
+    .tour-btn.active{border-color:var(--ink)}
+    .tour-stage{position:static}
+    .tour-phone{width:min(300px,74vw)}
+    .tour-info{display:block}
+    .tour-info p{max-width:46ch}
+    .tour-hint{display:flex;margin-top:18px}
+    .components-card{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .footer-top{grid-template-columns:1fr}
+    .footer-links{flex-direction:row;align-items:center;flex-wrap:wrap}
+    .lb-frame img{max-width:100%;max-height:60vh}
+  }
+  @media (max-width:680px){
+    .topnav{display:none}
+    .topbar{gap:12px}
+    .brand{font-size:17px}
+    .gh-btn{margin-left:auto}
+    .swatches{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .gallery-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .shot-cap span{display:none}
+    .lightbox{grid-template-columns:1fr;gap:18px;align-content:center}
+    .lb-info{max-width:none;text-align:left}
+    .lb-frame{max-height:62vh}
+    .lb-info p{display:none}
+  }
+  @media (max-width:430px){
+    .gallery-grid{grid-template-columns:1fr}
+    .components-card{grid-template-columns:1fr}
+    .hero-meta{font-size:8.5px}
+    .sticker{font-size:8.5px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    .ticker-track{animation:none}
+    *{transition:none!important}
+  }
+</style>
+</head>
+<body id="top">
+
+<header class="topbar">
+  <a class="brand" href="#top" aria-label="Lucia 首页">
+    <span class="brand-mark">L</span>
+    <span>LUCIA</span>
+    <span class="brand-dot" aria-hidden="true"></span>
+  </a>
+  <nav class="topnav" aria-label="页面导航">
+    <a href="#tour">界面</a>
+    <a href="#system">设计语言</a>
+    <a href="#screens">全部屏幕</a>
+  </nav>
+  <a class="gh-btn" href="https://github.com/wangwangbobo/lucia-travel" target="_blank" rel="noopener">
+    <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+    GitHub
+  </a>
+</header>
+
+<main>
+  <!-- HERO -->
+  <section class="wrap hero">
+    <div class="hero-copy">
+      <div class="eyebrow">LUCIA TRAVEL · iOS 18+ · 2026.10</div>
+      <h1>把一趟北京<br><span class="accent">装进口袋。</span></h1>
+      <p class="lede">行前清单、城市漫步、实时翻译、社区路线，还有随叫随到的 <strong style="white-space:nowrap">AI 助手</strong>。所有界面都装进一套奶油纸色的设计里，五栏导航和每一条跳转都保留。</p>
+      <div class="hero-actions">
+        <a class="btn btn-lime" href="#tour">浏览 12 个界面 <span class="arrow">↓</span></a>
+        <a class="btn" href="#screens">全部截图</a>
+      </div>
+      <ul class="hero-meta">
+        <li>12 个高保真界面</li>
+        <li>5 个主 Tab</li>
+        <li>静态网页预览</li>
+      </ul>
+    </div>
+    <div class="hero-stage" aria-hidden="true">
+      <div class="phone phone-back"><img src="shots/plan.png" alt=""></div>
+      <div class="phone phone-front"><img src="shots/trip.png" alt="Lucia 行程首页"></div>
+      <span class="sticker sticker-a">High-fidelity</span>
+      <span class="sticker sticker-b">5 Tabs · 1 Orb</span>
+      <span class="sticker sticker-c">iOS 27 Sim</span>
+    </div>
+  </section>
+
+  <!-- TICKER -->
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker-track">
+      <span>行前清单 <i>✦</i> 中轴线 Citywalk <i>✦</i> 实时翻译 <i>✦</i> 社区路线 <i>✦</i> 离线应急 <i>✦</i> AI 助手 <i>✦</i> 可视化笔记 <i>✦</i></span>
+      <span>行前清单 <i>✦</i> 中轴线 Citywalk <i>✦</i> 实时翻译 <i>✦</i> 社区路线 <i>✦</i> 离线应急 <i>✦</i> AI 助手 <i>✦</i> 可视化笔记 <i>✦</i></span>
+    </div>
+  </div>
+
+  <!-- TOUR -->
+  <section class="wrap section" id="tour">
+    <div class="section-head">
+      <div class="eyebrow">01 / Screen tour</div>
+      <h2>12 个界面，<span class="scribble">一条完整的旅程</span></h2>
+      <p>从出发前的清单，到落地后的翻译和社区。点左侧切换，或者用键盘 ← → 翻页。</p>
+    </div>
+    <div class="tour-grid">
+      <aside class="tour-list" aria-label="界面列表" id="tourList"></aside>
+      <div class="tour-stage">
+        <div class="phone tour-phone">
+          <img id="tourImg" src="shots/trip.png" alt="行程首页" width="1206" height="2622">
+        </div>
+        <div class="tour-controls">
+          <button class="icon-btn" id="prevBtn" aria-label="上一个界面"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3L5 8l5 5"/></svg></button>
+          <span id="tourCount">01 / 12</span>
+          <button class="icon-btn" id="nextBtn" aria-label="下一个界面"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3l5 5-5 5"/></svg></button>
+        </div>
+      </div>
+      <div class="tour-info" aria-live="polite">
+        <div class="tour-index" id="tourIndex">01 / 12</div>
+        <h3 id="tourTitle">行程首页</h3>
+        <div class="tour-en" id="tourEn">Trip · Home</div>
+        <p id="tourDesc">奶油纸底上铺一张晴天的中轴线插画，温度和票务提醒都收在一屏。往下是清单与路线两块小卡，Dock 永远在手边。</p>
+        <div class="chips" id="tourTags"></div>
+        <div class="tour-hint"><span class="key">←</span><span class="key">→</span> 键盘切换界面</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SYSTEM -->
+  <section class="system" id="system">
+    <div class="wrap section" style="padding-top:clamp(56px,7vw,96px);padding-bottom:clamp(56px,7vw,96px)">
+      <div class="section-head">
+        <div class="eyebrow">02 / Design system</div>
+        <h2>奶油纸、墨线，和<span class="scribble">一点荧光</span></h2>
+        <p>十张参考图最后收成一套系统：温暖的纸面、1.2pt 的墨色描边、硬偏移阴影，配粗黑标题、等宽小字眉标和贴纸。</p>
+      </div>
+      <div class="system-grid">
+        <div class="card colors-card">
+          <div class="card-eyebrow"><span>Color</span><span>10 tones</span></div>
+          <h3>纸色与荧光</h3>
+          <div class="swatches">
+            <div class="swatch"><div class="block" style="background:#F4ECDC"></div><b>奶油纸</b><small>#F4ECDC</small></div>
+            <div class="swatch"><div class="block" style="background:#FFFCF2"></div><b>纸面</b><small>#FFFCF2</small></div>
+            <div class="swatch"><div class="block" style="background:#191710"></div><b>墨</b><small>#191710</small></div>
+            <div class="swatch"><div class="block" style="background:#DDEB86"></div><b>荧光绿</b><small>#DDEB86</small></div>
+            <div class="swatch"><div class="block" style="background:#F2C14E"></div><b>芥末黄</b><small>#F2C14E</small></div>
+            <div class="swatch"><div class="block" style="background:#EE5B34"></div><b>珊瑚橙</b><small>#EE5B34</small></div>
+            <div class="swatch"><div class="block" style="background:#F3B1C6"></div><b>浅粉</b><small>#F3B1C6</small></div>
+            <div class="swatch"><div class="block" style="background:#8CA3E8"></div><b>长春花蓝</b><small>#8CA3E8</small></div>
+            <div class="swatch"><div class="block" style="background:#B7DFC0"></div><b>薄荷</b><small>#B7DFC0</small></div>
+            <div class="swatch"><div class="block" style="background:#BADCF0"></div><b>天蓝</b><small>#BADCF0</small></div>
+          </div>
+        </div>
+        <div class="card type-card">
+          <div class="card-eyebrow"><span>Type</span><span>Display / Mono</span></div>
+          <h3>重标题，小眉标</h3>
+          <div class="type-sample">还有 <em>6</em> 件小事</div>
+          <div class="type-meta">Display 900 · -4% tracking</div>
+          <p>中文用粗黑字压住画面，英文小字用等宽字体做注脚。两者之间的留白，就是整套界面的呼吸。</p>
+          <div class="mono-sample">MAKE IT EASY · 3 DAYS TO GO</div>
+        </div>
+        <div class="card components-card">
+          <div class="demo"><span class="demo-label">Sticker</span><span class="demo-sticker">Local favorite</span></div>
+          <div class="demo"><span class="demo-label">Button</span><span class="demo-btn">加入清单</span></div>
+          <div class="demo"><span class="demo-label">Tags</span><div class="demo-tags"><span class="demo-tag">家庭</span><span class="demo-tag pink">本地人常去</span><span class="demo-tag sky">♥ 2.3k</span></div></div>
+          <div class="demo"><span class="demo-label">Progress</span><div class="ring"><span>50%</span></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GALLERY -->
+  <section class="wrap section" id="screens">
+    <div class="section-head gallery-head">
+      <div>
+        <div class="eyebrow">03 / All screens</div>
+        <h2>全部屏幕，<span class="scribble">点开看细节</span></h2>
+        <p>12 张模拟器实拍截图，点击任意一张放大。</p>
+      </div>
+      <a class="btn" href="#tour">按流程浏览 ↑</a>
+    </div>
+    <div class="gallery-grid" id="galleryGrid"></div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-top">
+      <div>
+        <h2 class="footer-title">LUCIA<em>.</em></h2>
+        <p class="footer-note">出行，不必慌张。这是一个 SwiftUI 高保真原型，网页只做静态预览；地图、票务、社区内容均为本地演示数据。</p>
+      </div>
+      <div class="footer-links">
+        <a href="https://github.com/wangwangbobo/lucia-travel" target="_blank" rel="noopener">GitHub ↗</a>
+        <a href="#top">回到顶部 ↑</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Lucia Travel · Designed in Beijing</span>
+      <span><span class="dot">●</span> Static preview · GitHub Pages</span>
+    </div>
+  </div>
+</footer>
+
+<div class="lightbox" id="lightbox" hidden role="dialog" aria-modal="true" aria-label="截图放大查看">
+  <button class="lb-close" id="lbClose" aria-label="关闭">
+    <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 3l10 10M13 3L3 13"/></svg>
+  </button>
+  <div class="lb-stage"><div class="lb-frame"><img id="lbImg" src="shots/trip.png" alt=""></div></div>
+  <div class="lb-info">
+    <div class="lb-count" id="lbCount">01 / 12</div>
+    <h3 id="lbTitle">行程首页</h3>
+    <div class="lb-en" id="lbEn">Trip · Home</div>
+    <p id="lbDesc"></p>
+    <div class="lb-nav">
+      <button class="icon-btn" id="lbPrev" aria-label="上一张"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3L5 8l5 5"/></svg></button>
+      <button class="icon-btn" id="lbNext" aria-label="下一张"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3l5 5-5 5"/></svg></button>
+    </div>
+  </div>
+</div>
+
+<script>
+const screens = [
+  {id:"trip", title:"行程首页", en:"Trip · Home", group:"主界面", img:"shots/trip.png",
+   desc:"奶油纸底上铺一张晴天的中轴线插画，温度和票务提醒都收在一屏。往下是清单与路线两块小卡，Dock 永远在手边。",
+   tags:["天气","今日路线","行前提醒"]},
+  {id:"plan", title:"计划 · 路线", en:"Plan · Citywalk", group:"主界面", img:"shots/plan.png",
+   desc:"悬浮地图加抽屉式站点列表。六站中轴线，拖动排序会自动重算时间，列表底部一条渐隐提示你还有下一站。",
+   tags:["地图","6 站","协作编辑"]},
+  {id:"forum", title:"社区", en:"Forum · Beijing", group:"主界面", img:"shots/forum.png",
+   desc:"社区像一张本地小报：荧光橙活动海报贴在最上面，下面是可一键套用的散步路线和地点卡片。",
+   tags:["本地活动","社区路线","一键套用"]},
+  {id:"translate", title:"翻译", en:"Translate", group:"主界面", img:"shots/translate.png",
+   desc:"实时对话和离线应急语句分成两档。中间那颗珊瑚色麦克风按一下就开始说话，下面是常用短语和 AI 组织句子。",
+   tags:["实时对话","离线","朗读"]},
+  {id:"me", title:"我的", en:"Profile", group:"主界面", img:"shots/me.png",
+   desc:"旅行档案：走过多少城、收藏多少地点。深色行程卡把出发日期、同行人、清单进度和路线入口叠在一起。",
+   tags:["档案","订单","旅途服务"]},
+  {id:"checklist", title:"行前清单", en:"Prep · Checklist", group:"流程与浮层", img:"shots/checklist.png",
+   desc:"按出发前和落地当天分组，12 件事做完 6 件。顶部荧光绿进度卡把百分比、倒计时和 AI 复查放在一起。",
+   tags:["进度 50%","分组","AI 复查"]},
+  {id:"assistant", title:"AI 助手", en:"Assistant", group:"流程与浮层", img:"shots/assistant.png",
+   desc:"全局助手，能读你的行程、天气和社区路线。回答里直接嵌入可锁定的门票卡片，不用跳出去。",
+   tags:["对话","工具卡片","门票"]},
+  {id:"place", title:"地点详情", en:"Place sheet", group:"流程与浮层", img:"shots/place.png",
+   desc:"地点详情是一张可以收藏的卡片：为什么推荐、营业时间、距离，还有一条社区原话，最后是加入清单。",
+   tags:["推荐理由","社区原话","收藏"]},
+  {id:"notes", title:"笔记海报", en:"Notes poster", group:"流程与浮层", img:"shots/notes.png",
+   desc:"把路线生成一张可分享的笔记海报。胶带、编号贴纸和手绘地图，分享出去像一张真的旅行手账。",
+   tags:["海报","手账","分享"]},
+  {id:"compose", title:"发布帖子", en:"Compose", group:"流程与浮层", img:"shots/compose.png",
+   desc:"发帖页把标题、正文、照片、分类和关联路线排成一张长表。没写标题时发布按钮是灰的，提示很克制。",
+   tags:["发帖","照片","路线关联"]},
+  {id:"reorder", title:"调整顺序", en:"Reorder stops", group:"流程与浮层", img:"shots/reorder.png",
+   desc:"调整顺序用原生拖拽列表，右侧手柄一拖，时间自动重排。纸面整页铺底，顶部是奶油色的说明条。",
+   tags:["拖拽","自动重算"]},
+  {id:"offline", title:"离线语句库", en:"Offline phrases", group:"流程与浮层", img:"shots/offline.png",
+   desc:"六个场景的应急语句，全部已下载。每句都能朗读和放大给店员看，最下面永远有拨打 120 的红色按钮。",
+   tags:["离线","应急","大字"]}
+];
+
+/* ---------- build tour list ---------- */
+const tourList = document.getElementById("tourList");
+let lastGroup = "";
+screens.forEach((s, i) => {
+  if (s.group !== lastGroup) {
+    const g = document.createElement("div");
+    g.className = "tour-group";
+    g.textContent = s.group;
+    tourList.appendChild(g);
+    lastGroup = s.group;
+  }
+  const b = document.createElement("button");
+  b.type = "button";
+  b.className = "tour-btn";
+  b.setAttribute("role", "tab");
+  b.dataset.index = i;
+  b.innerHTML = `<span class="num">${String(i+1).padStart(2,"0")}</span><span class="name">${s.title}</span><span class="en">${s.en}</span>`;
+  b.addEventListener("click", () => setScreen(i, true));
+  tourList.appendChild(b);
+});
+
+/* ---------- build gallery ---------- */
+const galleryGrid = document.getElementById("galleryGrid");
+screens.forEach((s, i) => {
+  const b = document.createElement("button");
+  b.type = "button";
+  b.className = "shot";
+  b.setAttribute("aria-label", `放大查看：${s.title}`);
+  b.innerHTML = `
+    <div class="shot-frame"><img src="${s.img}" alt="${s.title}界面截图" loading="lazy" width="1000" height="2174"></div>
+    <div class="shot-cap"><b>${s.title}</b><span>${s.en}</span></div>`;
+  b.addEventListener("click", () => openLightbox(i));
+  galleryGrid.appendChild(b);
+});
+
+/* ---------- tour ---------- */
+const tourImg = document.getElementById("tourImg");
+const tourCount = document.getElementById("tourCount");
+const tourIndexEl = document.getElementById("tourIndex");
+const tourTitle = document.getElementById("tourTitle");
+const tourEn = document.getElementById("tourEn");
+const tourDesc = document.getElementById("tourDesc");
+const tourTags = document.getElementById("tourTags");
+let current = 0;
+
+screens.forEach(s => { const im = new Image(); im.src = s.img; });
+
+function pad(n){ return String(n+1).padStart(2,"0"); }
+
+function setScreen(i, scrollIntoView){
+  current = (i + screens.length) % screens.length;
+  const s = screens[current];
+  tourImg.src = s.img;
+  tourImg.alt = s.title + "界面截图";
+  if (tourImg.animate) {
+    tourImg.animate(
+      [{opacity:.25, transform:"scale(.99)"},{opacity:1, transform:"scale(1)"}],
+      {duration:200, easing:"ease-out"}
+    );
+  }
+  tourCount.textContent = `${pad(current)} / ${String(screens.length).padStart(2,"0")}`;
+  tourIndexEl.textContent = `${pad(current)} / ${String(screens.length).padStart(2,"0")}`;
+  tourTitle.textContent = s.title;
+  tourEn.textContent = s.en;
+  tourDesc.textContent = s.desc;
+  tourTags.innerHTML = s.tags.map(t => `<span class="chip">${t}</span>`).join("");
+  document.querySelectorAll(".tour-btn").forEach((b, bi) => {
+    const on = bi === current;
+    b.classList.toggle("active", on);
+    b.setAttribute("aria-selected", on ? "true" : "false");
+    b.tabIndex = on ? 0 : -1;
+    if (on && scrollIntoView && window.innerWidth <= 900) {
+      b.scrollIntoView({behavior:"smooth", inline:"center", block:"nearest"});
+    }
+  });
+}
+
+document.getElementById("prevBtn").addEventListener("click", () => setScreen(current-1));
+document.getElementById("nextBtn").addEventListener("click", () => setScreen(current+1));
+
+/* ---------- lightbox ---------- */
+const lightbox = document.getElementById("lightbox");
+const lbImg = document.getElementById("lbImg");
+const lbCount = document.getElementById("lbCount");
+const lbTitle = document.getElementById("lbTitle");
+const lbEn = document.getElementById("lbEn");
+const lbDesc = document.getElementById("lbDesc");
+let lbIndex = 0;
+
+function openLightbox(i){
+  lbIndex = (i + screens.length) % screens.length;
+  const s = screens[lbIndex];
+  lbImg.src = s.img;
+  lbImg.alt = s.title + "界面截图";
+  lbCount.textContent = `${pad(lbIndex)} / ${String(screens.length).padStart(2,"0")}`;
+  lbTitle.textContent = s.title;
+  lbEn.textContent = s.en;
+  lbDesc.textContent = s.desc;
+  lightbox.hidden = false;
+  document.body.style.overflow = "hidden";
+}
+
+function closeLightbox(){
+  lightbox.hidden = true;
+  document.body.style.overflow = "";
+}
+
+document.getElementById("lbClose").addEventListener("click", closeLightbox);
+document.getElementById("lbPrev").addEventListener("click", () => openLightbox(lbIndex-1));
+document.getElementById("lbNext").addEventListener("click", () => openLightbox(lbIndex+1));
+lightbox.addEventListener("click", e => { if (e.target === lightbox) closeLightbox(); });
+
+document.addEventListener("keydown", e => {
+  if (!lightbox.hidden){
+    if (e.key === "Escape") closeLightbox();
+    if (e.key === "ArrowLeft") openLightbox(lbIndex-1);
+    if (e.key === "ArrowRight") openLightbox(lbIndex+1);
+  } else {
+    if (e.key === "ArrowLeft") setScreen(current-1);
+    if (e.key === "ArrowRight") setScreen(current+1);
+  }
+});
+
+setScreen(0);
+</script>
+</body>
+</html>
