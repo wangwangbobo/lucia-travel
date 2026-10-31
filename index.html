@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Lucia · 出行，不必慌张 — iOS 高保真原型</title>
-<meta name="description" content="Lucia 是一款 AI 旅行助手 iOS 原型：行前清单、城市漫步、实时翻译、社区路线与全局助手。12 个高保真界面预览。">
+<meta name="description" content="Lucia 是一款 AI 旅行助手 iOS 原型：行前清单、可拖拽的城市漫步、分类社区、拍照翻译与全局助手。22 个高保真界面预览。">
 <meta name="theme-color" content="#F4ECDC">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23DDEB86' stroke='%23191710' stroke-width='3'/%3E%3Ctext x='32' y='43' font-family='Helvetica,Arial' font-size='30' font-weight='900' text-anchor='middle' fill='%23191710'%3EL%3C/text%3E%3C/svg%3E">
 <style>
@@ -418,20 +418,20 @@
     <div class="hero-copy">
       <div class="eyebrow">LUCIA TRAVEL · iOS 18+ · 2026.10</div>
       <h1>把一趟北京<br><span class="accent">装进口袋。</span></h1>
-      <p class="lede">行前清单、城市漫步、实时翻译、社区路线，还有随叫随到的 <strong style="white-space:nowrap">AI 助手</strong>。所有界面都装进一套奶油纸色的设计里，五栏导航和每一条跳转都保留。</p>
+      <p class="lede">行前清单、可拖动点位的城市漫步、一页一个主题的社区频道、能拍菜单和路牌的翻译，还有随叫随到的 <strong style="white-space:nowrap">AI 助手</strong>。所有界面都装进一套奶油纸色的设计里。</p>
       <div class="hero-actions">
-        <a class="btn btn-lime" href="#tour">浏览 12 个界面 <span class="arrow">↓</span></a>
+        <a class="btn btn-lime" href="#tour">浏览 22 个界面 <span class="arrow">↓</span></a>
         <a class="btn" href="#screens">全部截图</a>
       </div>
       <ul class="hero-meta">
-        <li>12 个高保真界面</li>
+        <li>22 个高保真界面</li>
         <li>5 个主 Tab</li>
         <li>静态网页预览</li>
       </ul>
     </div>
     <div class="hero-stage" aria-hidden="true">
-      <div class="phone phone-back"><img src="shots/plan.png" alt=""></div>
-      <div class="phone phone-front"><img src="shots/trip.png" alt="Lucia 行程首页"></div>
+      <div class="phone phone-back"><img src="shots/plan.jpg" alt=""></div>
+      <div class="phone phone-front"><img src="shots/trip.jpg" alt="Lucia 行程首页"></div>
       <span class="sticker sticker-a">High-fidelity</span>
       <span class="sticker sticker-b">5 Tabs · 1 Orb</span>
       <span class="sticker sticker-c">iOS 27 Sim</span>
@@ -441,8 +441,8 @@
   <!-- TICKER -->
   <div class="ticker" aria-hidden="true">
     <div class="ticker-track">
-      <span>行前清单 <i>✦</i> 中轴线 Citywalk <i>✦</i> 实时翻译 <i>✦</i> 社区路线 <i>✦</i> 离线应急 <i>✦</i> AI 助手 <i>✦</i> 可视化笔记 <i>✦</i></span>
-      <span>行前清单 <i>✦</i> 中轴线 Citywalk <i>✦</i> 实时翻译 <i>✦</i> 社区路线 <i>✦</i> 离线应急 <i>✦</i> AI 助手 <i>✦</i> 可视化笔记 <i>✦</i></span>
+      <span>行前清单 <i>✦</i> 中轴线 Citywalk <i>✦</i> 拖动点位 <i>✦</i> 相似路线 <i>✦</i> 分类频道 <i>✦</i> 拍照翻译 <i>✦</i> 离线应急 <i>✦</i> AI 助手 <i>✦</i></span>
+      <span>行前清单 <i>✦</i> 中轴线 Citywalk <i>✦</i> 拖动点位 <i>✦</i> 相似路线 <i>✦</i> 分类频道 <i>✦</i> 拍照翻译 <i>✦</i> 离线应急 <i>✦</i> AI 助手 <i>✦</i></span>
     </div>
   </div>
 
@@ -450,23 +450,23 @@
   <section class="wrap section" id="tour">
     <div class="section-head">
       <div class="eyebrow">01 / Screen tour</div>
-      <h2>12 个界面，<span class="scribble">一条完整的旅程</span></h2>
+      <h2>22 个界面，<span class="scribble">一条完整的旅程</span></h2>
       <p>从出发前的清单，到落地后的翻译和社区。点左侧切换，或者用键盘 ← → 翻页。</p>
     </div>
     <div class="tour-grid">
       <aside class="tour-list" aria-label="界面列表" id="tourList"></aside>
       <div class="tour-stage">
         <div class="phone tour-phone">
-          <img id="tourImg" src="shots/trip.png" alt="行程首页" width="1206" height="2622">
+          <img id="tourImg" src="shots/trip.jpg" alt="行程首页" width="1206" height="2622">
         </div>
         <div class="tour-controls">
           <button class="icon-btn" id="prevBtn" aria-label="上一个界面"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3L5 8l5 5"/></svg></button>
-          <span id="tourCount">01 / 12</span>
+          <span id="tourCount">01 / 22</span>
           <button class="icon-btn" id="nextBtn" aria-label="下一个界面"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3l5 5-5 5"/></svg></button>
         </div>
       </div>
       <div class="tour-info" aria-live="polite">
-        <div class="tour-index" id="tourIndex">01 / 12</div>
+        <div class="tour-index" id="tourIndex">01 / 22</div>
         <h3 id="tourTitle">行程首页</h3>
         <div class="tour-en" id="tourEn">Trip · Home</div>
         <p id="tourDesc">奶油纸底上铺一张晴天的中轴线插画，温度和票务提醒都收在一屏。往下是清单与路线两块小卡，Dock 永远在手边。</p>
@@ -525,7 +525,7 @@
       <div>
         <div class="eyebrow">03 / All screens</div>
         <h2>全部屏幕，<span class="scribble">点开看细节</span></h2>
-        <p>12 张模拟器实拍截图，点击任意一张放大。</p>
+        <p>22 张模拟器实拍截图，点击任意一张放大。</p>
       </div>
       <a class="btn" href="#tour">按流程浏览 ↑</a>
     </div>
@@ -556,9 +556,9 @@
   <button class="lb-close" id="lbClose" aria-label="关闭">
     <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 3l10 10M13 3L3 13"/></svg>
   </button>
-  <div class="lb-stage"><div class="lb-frame"><img id="lbImg" src="shots/trip.png" alt=""></div></div>
+  <div class="lb-stage"><div class="lb-frame"><img id="lbImg" src="shots/trip.jpg" alt=""></div></div>
   <div class="lb-info">
-    <div class="lb-count" id="lbCount">01 / 12</div>
+    <div class="lb-count" id="lbCount">01 / 22</div>
     <h3 id="lbTitle">行程首页</h3>
     <div class="lb-en" id="lbEn">Trip · Home</div>
     <p id="lbDesc"></p>
@@ -571,40 +571,74 @@
 
 <script>
 const screens = [
-  {id:"trip", title:"行程首页", en:"Trip · Home", group:"主界面", img:"shots/trip.png",
+  {id:"trip", title:"行程首页", en:"Trip · Home", group:"主界面", img:"shots/trip.jpg",
    desc:"奶油纸底上铺一张晴天的中轴线插画，温度和票务提醒都收在一屏。往下是清单与路线两块小卡，Dock 永远在手边。",
    tags:["天气","今日路线","行前提醒"]},
-  {id:"plan", title:"计划 · 路线", en:"Plan · Citywalk", group:"主界面", img:"shots/plan.png",
-   desc:"悬浮地图加抽屉式站点列表。六站中轴线，拖动排序会自动重算时间，列表底部一条渐隐提示你还有下一站。",
-   tags:["地图","6 站","协作编辑"]},
-  {id:"forum", title:"社区", en:"Forum · Beijing", group:"主界面", img:"shots/forum.png",
-   desc:"社区像一张本地小报：荧光橙活动海报贴在最上面，下面是可一键套用的散步路线和地点卡片。",
-   tags:["本地活动","社区路线","一键套用"]},
-  {id:"translate", title:"翻译", en:"Translate", group:"主界面", img:"shots/translate.png",
-   desc:"实时对话和离线应急语句分成两档。中间那颗珊瑚色麦克风按一下就开始说话，下面是常用短语和 AI 组织句子。",
-   tags:["实时对话","离线","朗读"]},
-  {id:"me", title:"我的", en:"Profile", group:"主界面", img:"shots/me.png",
+  {id:"plan", title:"计划 · 路线", en:"Plan · Citywalk", group:"主界面", img:"shots/plan.jpg",
+   desc:"地图、站点和 AI 建议收在一屏。底部第三颗按钮是珊瑚色的「问问 Lucia」，和加地点、生成笔记并排；下面一条相似路线提示，最高 94% 匹配。",
+   tags:["地图","AI 建议","相似路线"]},
+  {id:"forum", title:"社区", en:"Forum · Beijing", group:"主界面", img:"shots/forum.jpg",
+   desc:"搜索框留在最上面，下面是五个主题频道：餐厅热度、景点、伴手礼、路线和活动。每个频道都是一页一个主题，点进去就是完整专题页。",
+   tags:["保留搜索","主题频道","一页一主题"]},
+  {id:"translate", title:"翻译", en:"Translate", group:"主界面", img:"shots/translate.jpg",
+   desc:"实时对话、离线应急语句、拍照翻译分成三档。中间那颗珊瑚色麦克风按一下就开始说话，下面是常用短语和 AI 组织句子。",
+   tags:["实时对话","离线","拍照"]},
+  {id:"me", title:"我的", en:"Profile", group:"主界面", img:"shots/me.jpg",
    desc:"旅行档案：走过多少城、收藏多少地点。深色行程卡把出发日期、同行人、清单进度和路线入口叠在一起。",
    tags:["档案","订单","旅途服务"]},
-  {id:"checklist", title:"行前清单", en:"Prep · Checklist", group:"流程与浮层", img:"shots/checklist.png",
+
+  {id:"plan-edit", title:"计划 · 编辑点位", en:"Plan · Drag pins", group:"计划升级", img:"shots/plan-edit.jpg",
+   desc:"编辑模式下每个编号点位都能直接拖，虚线圆环和小手图标提示可移动。松手后路线和步行时间实时重连，AI 建议和相似路线暂时收起，专心调图。",
+   tags:["拖动点位","实时重算","编辑模式"]},
+  {id:"plan-similar", title:"相似路线推荐", en:"Similar routes", group:"计划升级", img:"shots/plan-similar.jpg",
+   desc:"「和你的路线很像」抽屉列出平台上已有路线：94%、87%、79% 三档匹配，写明作者、站数和亮点，可以一键套用成自己的副本。",
+   tags:["94% 匹配","一键套用","平台已有"]},
+
+  {id:"forum-restaurant", title:"餐厅热度榜", en:"Eat · Ranking", group:"社区频道", img:"shots/forum-restaurant.jpg",
+   desc:"四季民福、满恒记、胖妹面庄到 Metal Hands，按本周收藏与到店打卡排出热度条。下面接最新分享和「分享一家私藏餐厅」。",
+   tags:["热度排名","本周最热","到店打卡"]},
+  {id:"forum-spot", title:"景点推荐", en:"See · Spots", group:"社区频道", img:"shots/forum-spot.jpg",
+   desc:"按日落、人少、亲子、建筑、划船挑一个。景山、天坛、北海排成两列大卡，最下面一条日落时间提示，连到场时间都算好了。",
+   tags:["日落","人少","亲子"]},
+  {id:"forum-gift", title:"伴手礼推荐", en:"Take home · Gifts", group:"社区频道", img:"shots/forum-gift.jpg",
+   desc:"先把「本地人买」和「游客款」并排对比，再列稻香村、故宫文创和同仁堂。底部一键把推荐加入行前清单，旁边是可托运提示。",
+   tags:["本地人买","可托运","加入清单"]},
+  {id:"forum-route", title:"Citywalk 路线分享", en:"Walk · Routes", group:"社区频道", img:"shots/forum-route.jpg",
+   desc:"顶上一张深色「我的路线草稿」，下面是社区路线：手绘地图、作者、站数、公里数和标签，任何一条都能套用成自己的副本。",
+   tags:["社区路线","手绘地图","套用副本"]},
+  {id:"forum-event", title:"本地活动", en:"Events", group:"社区频道", img:"shots/forum-event.jpg",
+   desc:"本周精选是一张荧光橙海报，报名状态和距离都在上面。活动日历按时间排开旧物市集和夜骑，底部是发起活动的入口。",
+   tags:["胡同夜市","报名","发起活动"]},
+  {id:"forum-eventcompose", title:"发布本地活动", en:"Publish event", group:"社区频道", img:"shots/forum-eventcompose.jpg",
+   desc:"活动名称、日期、时间、地点、费用和说明排成一张长表，底部实时预览卡片。没填名称和地点时，发布按钮保持克制地灰着。",
+   tags:["发布","实时预览","审核"]},
+
+  {id:"translate-photo", title:"拍照翻译 · 菜单", en:"Camera · Menu", group:"翻译升级", img:"shots/translate-photo.jpg",
+   desc:"相机取景框里拍一张菜单，Lucia 用荧光绿圈出四道菜，给出中英对照、价格和朗读。照片只在本地识别，不上传。",
+   tags:["菜单","OCR","本地识别"]},
+  {id:"translate-photo-sign", title:"拍照翻译 · 路牌", en:"Camera · Sign", group:"翻译升级", img:"shots/translate-photo-sign.jpg",
+   desc:"换成路牌也认得：南锣鼓巷、什刹海、地铁 6 号线，方向牌上的距离一并读出。识别结果可以复制，也可以整段念给你听。",
+   tags:["路牌","中英对照","朗读"]},
+
+  {id:"checklist", title:"行前清单", en:"Prep · Checklist", group:"流程与浮层", img:"shots/checklist.jpg",
    desc:"按出发前和落地当天分组，12 件事做完 6 件。顶部荧光绿进度卡把百分比、倒计时和 AI 复查放在一起。",
    tags:["进度 50%","分组","AI 复查"]},
-  {id:"assistant", title:"AI 助手", en:"Assistant", group:"流程与浮层", img:"shots/assistant.png",
+  {id:"assistant", title:"AI 助手", en:"Assistant", group:"流程与浮层", img:"shots/assistant.jpg",
    desc:"全局助手，能读你的行程、天气和社区路线。回答里直接嵌入可锁定的门票卡片，不用跳出去。",
    tags:["对话","工具卡片","门票"]},
-  {id:"place", title:"地点详情", en:"Place sheet", group:"流程与浮层", img:"shots/place.png",
+  {id:"place", title:"地点详情", en:"Place sheet", group:"流程与浮层", img:"shots/place.jpg",
    desc:"地点详情是一张可以收藏的卡片：为什么推荐、营业时间、距离，还有一条社区原话，最后是加入清单。",
    tags:["推荐理由","社区原话","收藏"]},
-  {id:"notes", title:"笔记海报", en:"Notes poster", group:"流程与浮层", img:"shots/notes.png",
+  {id:"notes", title:"笔记海报", en:"Notes poster", group:"流程与浮层", img:"shots/notes.jpg",
    desc:"把路线生成一张可分享的笔记海报。胶带、编号贴纸和手绘地图，分享出去像一张真的旅行手账。",
    tags:["海报","手账","分享"]},
-  {id:"compose", title:"发布帖子", en:"Compose", group:"流程与浮层", img:"shots/compose.png",
+  {id:"compose", title:"发布帖子", en:"Compose", group:"流程与浮层", img:"shots/compose.jpg",
    desc:"发帖页把标题、正文、照片、分类和关联路线排成一张长表。没写标题时发布按钮是灰的，提示很克制。",
    tags:["发帖","照片","路线关联"]},
-  {id:"reorder", title:"调整顺序", en:"Reorder stops", group:"流程与浮层", img:"shots/reorder.png",
+  {id:"reorder", title:"调整顺序", en:"Reorder stops", group:"流程与浮层", img:"shots/reorder.jpg",
    desc:"调整顺序用原生拖拽列表，右侧手柄一拖，时间自动重排。纸面整页铺底，顶部是奶油色的说明条。",
    tags:["拖拽","自动重算"]},
-  {id:"offline", title:"离线语句库", en:"Offline phrases", group:"流程与浮层", img:"shots/offline.png",
+  {id:"offline", title:"离线语句库", en:"Offline phrases", group:"流程与浮层", img:"shots/offline.jpg",
    desc:"六个场景的应急语句，全部已下载。每句都能朗读和放大给店员看，最下面永远有拨打 120 的红色按钮。",
    tags:["离线","应急","大字"]}
 ];
