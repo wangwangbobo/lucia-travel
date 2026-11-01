@@ -82,6 +82,12 @@
   }
   .gh-btn:hover{transform:translate(1px,1px);box-shadow:1px 1px 0 rgba(25,23,16,.9)}
   .gh-btn svg{width:13px;height:13px}
+  .lang-btn{
+    height:34px;padding:0 13px;border:1.2px solid var(--ink);border-radius:999px;background:var(--paper);
+    font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.08em;color:var(--ink);
+    cursor:pointer;box-shadow:2px 2px 0 rgba(25,23,16,.9);transition:transform .15s,box-shadow .15s,background .15s;
+  }
+  .lang-btn:hover{transform:translate(1px,1px);box-shadow:1px 1px 0 rgba(25,23,16,.9);background:var(--lime)}
 
   /* ---------- install ---------- */
   section[id]{scroll-margin-top:86px}
@@ -407,6 +413,8 @@
     <a href="#tour">界面</a>
     <a href="#screens">全部屏幕</a>
   </nav>
+  <button class="lang-btn" id="langBtn" type="button">EN</button>
+
   <a class="gh-btn" href="https://github.com/wangwangbobo/lucia-travel" target="_blank" rel="noopener">
     <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
     GitHub
@@ -575,124 +583,208 @@
 const screens = [
   {id:"welcome", title:"首次规划", en:"Launch · Pico planner", group:"新旅程", img:"shots/welcome.jpg",
    desc:"第一次打开不问城市，先问你怎么玩。几天、什么节奏、想不想定主题——三题答完，Pico 就把顺序、时间和步行量都排好，直接落到行程页。",
-   tags:["三题规划","Pico","首次进入"]},
+   tags:["三题规划","Pico","首次进入"], descEn:"No city picker on first launch — it asks how you like to travel. Days, pace, and an optional theme. Answer the three questions and Pico lays out the order, timing and walking load, then drops the plan straight onto the trip page.", tagsEn:["3-question plan","Pico","First launch"]},
 
   {id:"trip", title:"行程首页", en:"Trip · Home", group:"主界面", img:"shots/trip.jpg",
    desc:"顶部是 Pico 对整趟行程的一句话结论，往下是路线小地图和第 01 天日程。底部常驻「保存计划 / 开始旅程」，落地后换成下一站。",
-   tags:["Pico 规划","路线地图","每日日程"]},
+   tags:["Pico 规划","路线地图","每日日程"], descEn:"Pico's one-line verdict on the whole trip sits on top, followed by a mini route map and Day 01. 「Save plan / Start trip」 lives at the bottom and turns into the next stop once you land.", tagsEn:["Pico plan","Route map","Daily schedule"]},
   {id:"plan", title:"计划地图", en:"Plan · Citywalk", group:"主界面", img:"shots/plan.jpg",
    desc:"6 站 4.2 公里串在中轴线上，站点、连接线、人流图层和 Pico 建议都在一屏。底部是调整站点、重排顺序、相似路线三个入口。",
-   tags:["中轴线","6 站","Pico 建议"]},
+   tags:["中轴线","6 站","Pico 建议"], descEn:"Six stops and 4.2 km strung along the central axis — stops, connectors, crowd layers and Pico's suggestions in one view. Three entries at the bottom: adjust stops, reorder, similar routes.", tagsEn:["Central axis","6 stops","Pico tips"]},
   {id:"forum", title:"社区 · 我们的北京", en:"Community · Feed", group:"主界面", img:"shots/forum.jpg",
    desc:"社区改成了一条信息流：顶部搜索，下面按全部、美食、景点、路线、活动筛选，卡片写明作者、时间和地点。右上角可以发起自己的城市漫步。",
-   tags:["信息流","分类筛选","可发布"]},
+   tags:["信息流","分类筛选","可发布"], descEn:"The community is a feed: search on top, filters for food, sights, routes and events, and cards showing the author, time and place. Start your own city walk from the top-right.", tagsEn:["Feed","Filters","Post your own"]},
   {id:"translate", title:"翻译", en:"Translate", group:"主界面", img:"shots/translate.jpg",
    desc:"实时对话、离线语句、拍照翻译分成三档。中间珊瑚色麦克风按一下开始说话，中英对照逐句排开，每句都能单独朗读。",
-   tags:["实时对话","中英对照","朗读"]},
+   tags:["实时对话","中英对照","朗读"], descEn:"Live conversation, offline phrases and camera translation in three tiers. Tap the coral mic to talk; Chinese-English lines stack up, and every line reads aloud.", tagsEn:["Live talk","ZH-EN pairs","Read aloud"]},
   {id:"me", title:"我的 · 旅行档案", en:"Profile", group:"主界面", img:"shots/me.jpg",
    desc:"旅行档案：走过 12 座城、收藏 46 个地点、分享 3 条路线。深色行程卡叠着日期、同行人、清单进度和路线入口。",
-   tags:["档案","同行人","清单进度"]},
+   tags:["档案","同行人","清单进度"], descEn:"Travel profile: 12 cities covered, 46 saved places, 3 shared routes. A dark trip card stacks the dates, companions, checklist progress and the route entry.", tagsEn:["Profile","Companions","Checklist"]},
 
   {id:"trip-days", title:"行程 · 每日路线", en:"Trip · Days", group:"计划升级", img:"shots/trip-days.jpg",
    desc:"第 1 天 09:00 故宫、14:00 景山、17:00 什刹海，每站标了停留时间和步行段。日期一改，整条行程跟着重排。",
-   tags:["逐日路线","时间轴","可改日期"]},
+   tags:["逐日路线","时间轴","可改日期"], descEn:"Day 1: Forbidden City 09:00, Jingshan 14:00, Shichahai 17:00 — every stop shows dwell time and walking legs. Change the date and the whole trip re-sequences.", tagsEn:["Day-by-day","Timeline","Shiftable dates"]},
   {id:"trip-live", title:"行中 · 下一站", en:"Trip · Live", group:"计划升级", img:"shots/trip-live.jpg",
    desc:"开始旅程后切到行中视图：当前站在哪、下一站多远、今天还剩几个点。卡片里能直接问 Pico 或打开导航，走完自动进入总结。",
-   tags:["行中模式","下一站","实时导航"]},
+   tags:["行中模式","下一站","实时导航"], descEn:"Once the trip starts, a live view takes over: where you are now, how far to the next stop, what's left today. Ask Pico or open navigation from the card; it flows into the recap when you finish.", tagsEn:["Live mode","Next stop","Navigation"]},
   {id:"plan-edit", title:"计划 · 调整站点", en:"Plan · Adjust stops", group:"计划升级", img:"shots/plan-edit.jpg",
    desc:"点「调整站点」进入编辑态，编号圆点可以直接拖，虚线提示落点；松手后路线和步行时间实时重连，其他浮层自动收起。",
-   tags:["拖动站点","实时重算","编辑态"]},
+   tags:["拖动站点","实时重算","编辑态"], descEn:"Tap 「Adjust stops」 to enter edit mode: drag the numbered dots directly, with dashed hints for drop points. Release and the route and walking time re-link in real time while other sheets tuck away.", tagsEn:["Drag stops","Live re-route","Edit mode"]},
   {id:"plan-similar", title:"相似路线", en:"Similar routes", group:"计划升级", img:"shots/plan-similar.jpg",
    desc:"「相似路线」抽屉列出社区里已经走过的路线：94%、87%、79% 三档匹配，写明作者、站数和亮点，可以一键套用成自己的副本。",
-   tags:["94% 匹配","一键套用","社区路线"]},
+   tags:["94% 匹配","一键套用","社区路线"], descEn:"The 「Similar routes」 drawer lists community walks already taken: 94%, 87%, 79% matches with author, stop count and highlights — copy any of them into your own plan in one tap.", tagsEn:["94% match","One-tap copy","Community routes"]},
 
   {id:"forum-restaurant", title:"去哪儿吃", en:"Community · Eat", group:"社区频道", img:"shots/forum-restaurant.jpg",
    desc:"按本周热度排餐厅：四季民福、满恒记、胖妹面庄到 Metal Hands，卡上写清招牌菜、价格和最佳时间，下面接最新分享。",
-   tags:["本周热度","招牌菜","最佳时间"]},
+   tags:["本周热度","招牌菜","最佳时间"], descEn:"Restaurants ranked by this week's buzz: Siji Minfu, Manhengji, Pangmei Noodle Bar to Metal Hands. Each card lists the signature dish, price and best time to go, with the latest shares below.", tagsEn:["This week's buzz","Signature dishes","Best time"]},
   {id:"forum-spot", title:"看什么", en:"Community · See", group:"社区频道", img:"shots/forum-spot.jpg",
    desc:"按日落、人少、亲子、建筑、划船挑景点，景山、天坛、北海排成两列大卡。最下面一条日落时间提示，连到场时间都算好了。",
-   tags:["日落","人少","亲子"]},
+   tags:["日落","人少","亲子"], descEn:"Pick sights by sunset, fewer crowds, kids, architecture or boating — Jingshan, the Temple of Heaven and Beihai in big two-column cards. The last row even counts down to sunset with an arrival time.", tagsEn:["Sunset","Fewer crowds","Family"]},
   {id:"forum-gift", title:"带回家的伴手礼", en:"Community · Gifts", group:"社区频道", img:"shots/forum-gift.jpg",
    desc:"先把「本地人买」和「游客款」并排对比，再列稻香村、故宫文创和同仁堂。底部一键加入行前清单，旁边标着能不能托运。",
-   tags:["本地人买","可托运","加入清单"]},
+   tags:["本地人买","可托运","加入清单"], descEn:"Compare 「what locals buy」 with 「tourist versions」 side by side, then browse Daoxiangcun, Palace Museum merch and Tongrentang. Add to the pre-trip checklist in one tap, with a can-it-fly note.", tagsEn:["Locals' pick","Checkable","Add to list"]},
   {id:"forum-route", title:"城市漫步", en:"Community · Walk", group:"社区频道", img:"shots/forum-route.jpg",
    desc:"社区路线可以整套借走：手绘封面、作者、站数、公里数和标签，点开就是一篇完整笔记，看完直接套用成自己的路线。",
-   tags:["社区路线","手绘封面","套用副本"]},
+   tags:["社区路线","手绘封面","套用副本"], descEn:"Community routes can be borrowed whole: hand-drawn cover, author, stop count, distance and tags. Open one for a full note, then adopt it as your own route.", tagsEn:["Community routes","Hand-drawn cover","Copy plan"]},
   {id:"forum-event", title:"本地活动", en:"Community · Events", group:"社区频道", img:"shots/forum-event.jpg",
    desc:"本周活动按日期排开：胡同夜市、白塔寺旧物市集、中轴夜骑，报名状态、集合点和距离都在卡上，底部是发起活动的入口。",
-   tags:["本周活动","报名","发起活动"]},
+   tags:["本周活动","报名","发起活动"], descEn:"This week's events by date: hutong night market, Baita Temple vintage fair, a night ride along the central axis — signup status, meeting point and distance on each card, with 「host an event」 at the bottom.", tagsEn:["This week","Sign up","Host an event"]},
   {id:"forum-eventcompose", title:"发起城市漫步", en:"Community · Publish", group:"社区频道", img:"shots/forum-eventcompose.jpg",
    desc:"活动名称、日期、时间、集合地点、费用和说明排成一张长表，底部实时预览卡片。没填名称和地点时，发布按钮保持克制地灰着。",
-   tags:["发布","实时预览","审核"]},
+   tags:["发布","实时预览","审核"], descEn:"Name, date, time, meeting point, fee and notes in one long form, with a live card preview at the bottom. The publish button stays quietly greyed until the name and place are filled.", tagsEn:["Publish","Live preview","Review"]},
   {id:"post", title:"笔记详情", en:"Note detail", group:"社区频道", img:"shots/post.jpg",
    desc:"笔记详情一页读完：大图、作者、正文、标签、点赞收藏和评论。底部可以收藏、问 Pico 怎么安排，或直接把地点加进路线。",
-   tags:["笔记详情","问 Pico","收藏"]},
+   tags:["笔记详情","问 Pico","收藏"], descEn:"A note reads end-to-end on one page: big photo, author, body, tags, likes, saves and comments. Save it, ask Pico how to fit it in, or drop the place straight into your route.", tagsEn:["Note detail","Ask Pico","Save"]},
 
   {id:"translate-photo", title:"拍照翻译 · 菜单", en:"Camera · Menu", group:"翻译", img:"shots/translate-photo.jpg",
    desc:"拍一张菜单，Pico 用荧光绿框出菜名和价格，给出中英对照和朗读。照片只在本地识别，不上传。",
-   tags:["菜单","框选识别","本地"]},
+   tags:["菜单","框选识别","本地"], descEn:"Snap a menu and Pico boxes the dish names and prices in fluorescent lime, with Chinese-English pairs and read-aloud. Recognition runs on-device — nothing is uploaded.", tagsEn:["Menu","Boxed OCR","On-device"]},
   {id:"translate-sign", title:"拍照翻译 · 路牌", en:"Camera · Sign", group:"翻译", img:"shots/translate-sign.jpg",
    desc:"换成路牌也认得：南锣鼓巷、什刹海、地铁 6 号线，方向牌上的距离一并读出。识别结果能复制，也能整段念给你听。",
-   tags:["路牌","中英对照","朗读"]},
+   tags:["路牌","中英对照","朗读"], descEn:"Street signs work too: Nanluoguxiang, Shichahai, Metro Line 6 — distances on the direction signs read out as well. Copy the result or have the whole line read to you.", tagsEn:["Street signs","ZH-EN pairs","Read aloud"]},
   {id:"translate-offline", title:"离线语句", en:"Offline phrases", group:"翻译", img:"shots/translate-offline.jpg",
    desc:"六个场景的应急语句，全部已下载。每句都能朗读和放大给店员看，最下面永远有拨打 120 的红色按钮。",
-   tags:["离线","应急","大字"]},
+   tags:["离线","应急","大字"], descEn:"Emergency phrases across six scenes, all downloaded. Every line reads aloud and zooms big enough to show staff, and a red 「call 120」 button stays pinned at the bottom.", tagsEn:["Offline","Emergency","Big text"]},
 
   {id:"me-bookings", title:"景点预约", en:"Bookings", group:"档案与总结", img:"shots/me-bookings.jpg",
    desc:"把故宫、长城、颐和园、国博排进日程，逐条显示预约状态和凭证。故宫周一闭馆会提前一天提醒，日期也能整趟平移。",
-   tags:["景点预约","凭证","闭馆提醒"]},
+   tags:["景点预约","凭证","闭馆提醒"], descEn:"Slot the Forbidden City, Great Wall, Summer Palace and National Museum into the schedule with per-item booking status and vouchers. The Forbidden City closes Mondays — a heads-up lands a day early, and dates can shift the whole trip.", tagsEn:["Bookings","Vouchers","Closure alert"]},
   {id:"recap", title:"旅程总结", en:"Trip recap", group:"档案与总结", img:"shots/recap.jpg",
    desc:"一趟走完自动生成回顾：8 屏里有时长、公里数、新地点和旅行称号，最后收成一张可以分享的黑底海报。",
-   tags:["旅程总结","公里数","分享海报"]},
+   tags:["旅程总结","公里数","分享海报"], descEn:"When the trip ends, a recap generates itself: eight slides of duration, kilometers, new places and a travel title, ending in a shareable black poster.", tagsEn:["Trip recap","Kilometers","Shareable poster"]},
 
   {id:"assistant", title:"Pico 助手", en:"Pico assistant", group:"流程与浮层", img:"shots/assistant.jpg",
    desc:"全局悬浮的 Pico 读得到你的行程、天气和社区路线。回答里直接嵌入可展开的计划卡片，点「查看我的行程」就落到行程页。",
-   tags:["全局助手","计划卡片","读行程"]},
+   tags:["全局助手","计划卡片","读行程"], descEn:"Pico floats over every tab and reads your trip, the weather and community routes. Replies embed expandable plan cards — tap 「View my trip」 to land back on the trip page.", tagsEn:["Global assistant","Plan cards","Trip-aware"]},
   {id:"checklist", title:"行前清单", en:"Prep · Checklist", group:"流程与浮层", img:"shots/checklist.jpg",
    desc:"12 件事按出发前和落地当天分组，顶部荧光绿进度卡把百分比、倒计时和 Pico 复查放在一起。",
-   tags:["进度 50%","分组","Pico 复查"]},
+   tags:["进度 50%","分组","Pico 复查"], descEn:"Twelve things grouped into 「before departure」 and 「arrival day」, with a lime progress card on top combining percent, countdown and a Pico re-check.", tagsEn:["50% progress","Grouped","Pico re-check"]},
   {id:"notes", title:"旅行笔记", en:"Notes poster", group:"流程与浮层", img:"shots/notes.jpg",
    desc:"把路线生成一张可分享的旅行笔记：编号站点、时间、罗盘和手绘地图，像一张真的旅行手账。",
-   tags:["海报","手账","分享"]},
+   tags:["海报","手账","分享"], descEn:"Turn a route into a shareable travel note: numbered stops, times, a compass and a hand-drawn map — like a real paper journal.", tagsEn:["Poster","Journal","Share"]},
   {id:"reorder", title:"调整顺序", en:"Reorder stops", group:"流程与浮层", img:"shots/reorder.jpg",
    desc:"调整顺序是一张整页列表：每一站点箭头上下挪，时间槽跟着回填。点「完成」后提示「顺序已更新 · 路线已重算」。",
-   tags:["箭头排序","自动重算"]}
+   tags:["箭头排序","自动重算"], descEn:"Reordering is a full-page list: arrow each stop up or down and the time slots refill behind it. Tap 「Done」 and it confirms 「Order updated · route recalculated」.", tagsEn:["Arrow reorder","Auto recalc"]}
 ];
+
+/* ---------- i18n ---------- */
+const GROUP_EN = {"新旅程":"First trip","主界面":"Main tabs","计划升级":"Plan upgrades","社区频道":"Community channels","翻译":"Translate","档案与总结":"Archive & recap","流程与浮层":"Flows & overlays"};
+const TITLE_ZH = "RoamChina · 出行，不必慌张 — iOS App 下载";
+const TITLE_EN = "RoamChina · Travel, don't panic — iOS App Download";
+let lang = "zh";
+try { lang = localStorage.getItem("rc-lang") === "en" ? "en" : "zh"; } catch(e){}
+const TITLE_OF = s => { const p = s.en.split("·"); return p[p.length-1].trim(); };
+const CAT_OF = s => s.en.includes("·") ? s.en.split("·")[0].trim() : (GROUP_EN[s.group] || s.group);
+const NAME_OF = s => lang === "zh" ? s.title : TITLE_OF(s);
+const SUB_OF = s => lang === "zh" ? s.en : CAT_OF(s);
+const DESC_OF = s => lang === "zh" ? s.desc : s.descEn;
+const TAGS_OF = s => lang === "zh" ? s.tags : s.tagsEn;
+
+const I18N = {
+  ".top-intro": {h:"<b>RoamChina</b> · A travel companion for visitors to China: 「My Trip」 plans the whole route and covers weather & ticket bookings; finds restaurants for vegetarians and translates allergens for the kitchen; live co-planning with travel mates, and real experiences in the forum."},
+  '.topnav a[href="#install"]': {t:"Install"},
+  '.topnav a[href="#tour"]': {t:"Screens"},
+  '.topnav a[href="#screens"]': {t:"All screens"},
+  ".hero h1": {h:"Put a trip to China<br><span class='accent'>in your pocket.</span>"},
+  ".hero .lede": {h:"First time in China? The hard parts are planning a complex itinerary, booking attractions, unfamiliar payments and the language barrier. RoamChina is built around 「My Trip」 — it works with local maps and experience data to route the whole journey and cover the small stuff: weather, ticket bookings; on the road it finds restaurants for vegetarians and translates allergens for the kitchen; travel mates can co-edit the plan live, and the forum is where real trip reports get swapped. A native app that fits in your iPhone."},
+  ".hero-actions .btn-lime": {h:"Download the iOS app <span class='arrow'>↓</span>"},
+  '.hero-actions a[href="#tour"]': {t:"Browse 26 screens"},
+  '.hero-actions a[href^="https://wangwangbobo.github.io/ios-app-demo/"]': {t:"Try the web demo ↗"},
+  ".hero-meta li:nth-child(1)": {t:"Native SwiftUI · iOS 18+"},
+  ".hero-meta li:nth-child(2)": {t:"Unsigned IPA · Sideload"},
+  ".hero-meta li:nth-child(3)": {t:"26 real screens"},
+  ".install-head h2": {h:"On your iPhone, <span class='scribble'>not in a browser.</span>"},
+  ".install-head p": {t:"GitHub Pages only hosts static files, so it can't run a native app. This page is the download door plus a UI preview — want to tap around first? Open the web demo above. The real app is in the package below."},
+  ".dl-claim": {t:"Pico first-run planning, drag-to-reroute stops, attraction bookings, the community feed, camera translation, offline phrases and a trip recap — all in this package."},
+  ".dl-actions .btn-lime": {h:"Download .ipa <span class='arrow'>↓</span>"},
+  '.dl-actions a[href*="releases/tag"]': {t:"Release page"},
+  ".steps-eyebrow": {t:"Sideload install · about 3 minutes"},
+  ".steps ol li:nth-child(1) span:last-child": {h:"Install <b>Sideloadly</b> on a Mac or PC and connect your iPhone with a cable."},
+  ".steps ol li:nth-child(2) span:last-child": {h:"Drag the downloaded ipa into Sideloadly, enter your own Apple ID and hit Start to re-sign."},
+  ".steps ol li:nth-child(3) span:last-child": {h:"On the iPhone, go to Settings → General → VPN & Device Management, trust the certificate, then open RoamChina from the home screen."},
+  ".steps-note": {t:"A free Apple ID signs for 7 days — re-sign when it expires; a paid developer account signs for a year. Rather skip sideloading tools? You can also build straight to your phone with Xcode."},
+  ".steps-alt": {h:"Source lives in the repo under <a href='https://github.com/wangwangbobo/lucia-travel/tree/main/ios' target='_blank' rel='noopener'>ios/</a>, with the <a href='ios/README.md'>build notes</a> too."},
+  ".ticker-track span": {h:"Pico first-run planning <i>✦</i> Drag a stop to re-route <i>✦</i> Trip recap <i>✦</i> Community feed <i>✦</i> Camera translation <i>✦</i> Offline phrases <i>✦</i> Attraction bookings <i>✦</i> EN / 中文 <i>✦</i>"},
+  "#tour .section-head h2": {h:"26 screens, <span class='scribble'>one full journey</span>"},
+  "#tour .section-head p": {t:"From the first plan Pico lays out to the recap when it's over. Click a screen on the left, or flip with ← →."},
+  ".tour-hint": {h:"<span class='key'>←</span><span class='key'>→</span> to switch screens"},
+  "#screens .section-head h2": {h:"Every screen, <span class='scribble'>tap for detail</span>"},
+  "#screens .section-head p": {t:"26 full-resolution screenshots — click any one to zoom in."},
+  ".gallery-head .btn": {t:"Browse by flow ↑"},
+  ".footer-note": {t:"Travel, don't panic. For visitors to China — make coming to China feel effortless. This is an installable SwiftUI app (iOS 18+); this page is the download door and UI preview. Pico, maps, tickets and community content are local demo data."},
+  '.footer-links a[href*="releases/tag"]': {t:"Download IPA ↗"},
+  '.footer-links a[href^="https://wangwangbobo.github.io/ios-app-demo/"]': {t:"Web demo ↗"},
+  '.footer-links a[href="https://github.com/wangwangbobo/lucia-travel"]': {t:"GitHub ↗"},
+  '.footer-links a[href="#top"]': {t:"Back to top ↑"},
+  "#tourList": {aria:"Screen list"},
+  "#prevBtn": {aria:"Previous screen"},
+  "#nextBtn": {aria:"Next screen"},
+  "#lightbox": {aria:"Zoomed screenshot view"},
+  "#lbClose": {aria:"Close"},
+  "#lbPrev": {aria:"Previous"},
+  "#lbNext": {aria:"Next"}
+};
+const i18nEls = [];
+for (const sel in I18N) {
+  document.querySelectorAll(sel).forEach(el => {
+    const d = I18N[sel], zh = {};
+    if ("t" in d) zh.t = el.textContent;
+    if ("h" in d) zh.h = el.innerHTML;
+    if ("aria" in d) zh.aria = el.getAttribute("aria-label");
+    i18nEls.push({el, d, zh});
+  });
+}
+function applyStatic(){
+  i18nEls.forEach(({el, d, zh}) => {
+    if ("t" in d) el.textContent = lang === "zh" ? zh.t : d.t;
+    if ("h" in d) el.innerHTML = lang === "zh" ? zh.h : d.h;
+    if ("aria" in d) el.setAttribute("aria-label", lang === "zh" ? zh.aria : d.aria);
+  });
+  document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
+  document.title = lang === "zh" ? TITLE_ZH : TITLE_EN;
+}
 
 /* ---------- build tour list ---------- */
 const tourList = document.getElementById("tourList");
 let lastGroup = "";
-screens.forEach((s, i) => {
-  if (s.group !== lastGroup) {
-    const g = document.createElement("div");
-    g.className = "tour-group";
-    g.textContent = s.group;
-    tourList.appendChild(g);
-    lastGroup = s.group;
-  }
-  const b = document.createElement("button");
-  b.type = "button";
-  b.className = "tour-btn";
-  b.setAttribute("role", "tab");
-  b.dataset.index = i;
-  b.innerHTML = `<span class="num">${String(i+1).padStart(2,"0")}</span><span class="name">${s.title}</span><span class="en">${s.en}</span>`;
-  b.addEventListener("click", () => setScreen(i, true));
-  tourList.appendChild(b);
-});
+function renderList(){
+  tourList.innerHTML = "";
+  lastGroup = "";
+  screens.forEach((s, i) => {
+    if (s.group !== lastGroup) {
+      const g = document.createElement("div");
+      g.className = "tour-group";
+      g.textContent = lang === "zh" ? s.group : (GROUP_EN[s.group] || s.group);
+      tourList.appendChild(g);
+      lastGroup = s.group;
+    }
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "tour-btn";
+    b.setAttribute("role", "tab");
+    b.dataset.index = i;
+    b.innerHTML = `<span class="num">${String(i+1).padStart(2,"0")}</span><span class="name">${NAME_OF(s)}</span><span class="en">${SUB_OF(s)}</span>`;
+    b.addEventListener("click", () => setScreen(i, true));
+    tourList.appendChild(b);
+  });
+}
 
 /* ---------- build gallery ---------- */
 const galleryGrid = document.getElementById("galleryGrid");
-screens.forEach((s, i) => {
-  const b = document.createElement("button");
-  b.type = "button";
-  b.className = "shot";
-  b.setAttribute("aria-label", `放大查看：${s.title}`);
-  b.innerHTML = `
-    <div class="shot-frame"><img src="${s.img}" alt="${s.title}界面截图" loading="lazy" width="1000" height="2174"></div>
-    <div class="shot-cap"><b>${s.title}</b><span>${s.en}</span></div>`;
-  b.addEventListener("click", () => openLightbox(i));
-  galleryGrid.appendChild(b);
-});
+function renderGallery(){
+  galleryGrid.innerHTML = "";
+  screens.forEach((s, i) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "shot";
+    b.setAttribute("aria-label", (lang === "zh" ? "放大查看：" : "Zoom: ") + NAME_OF(s));
+    b.innerHTML = `
+      <div class="shot-frame"><img src="${s.img}" alt="${NAME_OF(s)}" loading="lazy" width="1000" height="2174"></div>
+      <div class="shot-cap"><b>${NAME_OF(s)}</b><span>${SUB_OF(s)}</span></div>`;
+    b.addEventListener("click", () => openLightbox(i));
+    galleryGrid.appendChild(b);
+  });
+}
 
 /* ---------- tour ---------- */
 const tourImg = document.getElementById("tourImg");
@@ -712,7 +804,7 @@ function setScreen(i, scrollIntoView){
   current = (i + screens.length) % screens.length;
   const s = screens[current];
   tourImg.src = s.img;
-  tourImg.alt = s.title + "界面截图";
+  tourImg.alt = NAME_OF(s) + (lang === "zh" ? "界面截图" : " screenshot");
   if (tourImg.animate) {
     tourImg.animate(
       [{opacity:.25, transform:"scale(.99)"},{opacity:1, transform:"scale(1)"}],
@@ -721,10 +813,10 @@ function setScreen(i, scrollIntoView){
   }
   tourCount.textContent = `${pad(current)} / ${String(screens.length).padStart(2,"0")}`;
   tourIndexEl.textContent = `${pad(current)} / ${String(screens.length).padStart(2,"0")}`;
-  tourTitle.textContent = s.title;
+  tourTitle.textContent = NAME_OF(s);
   tourEn.textContent = s.en;
-  tourDesc.textContent = s.desc;
-  tourTags.innerHTML = s.tags.map(t => `<span class="chip">${t}</span>`).join("");
+  tourDesc.textContent = DESC_OF(s);
+  tourTags.innerHTML = TAGS_OF(s).map(t => `<span class="chip">${t}</span>`).join("");
   document.querySelectorAll(".tour-btn").forEach((b, bi) => {
     const on = bi === current;
     b.classList.toggle("active", on);
@@ -752,11 +844,11 @@ function openLightbox(i){
   lbIndex = (i + screens.length) % screens.length;
   const s = screens[lbIndex];
   lbImg.src = s.img;
-  lbImg.alt = s.title + "界面截图";
+  lbImg.alt = NAME_OF(s) + (lang === "zh" ? "界面截图" : " screenshot");
   lbCount.textContent = `${pad(lbIndex)} / ${String(screens.length).padStart(2,"0")}`;
-  lbTitle.textContent = s.title;
+  lbTitle.textContent = NAME_OF(s);
   lbEn.textContent = s.en;
-  lbDesc.textContent = s.desc;
+  lbDesc.textContent = DESC_OF(s);
   lightbox.hidden = false;
   document.body.style.overflow = "hidden";
 }
@@ -782,7 +874,22 @@ document.addEventListener("keydown", e => {
   }
 });
 
-setScreen(0);
+/* ---------- language switch ---------- */
+const langBtn = document.getElementById("langBtn");
+function applyLang(){
+  applyStatic();
+  renderList();
+  renderGallery();
+  setScreen(current, false);
+  langBtn.textContent = lang === "zh" ? "EN" : "中文";
+  langBtn.setAttribute("aria-label", lang === "zh" ? "Switch to English" : "切换到中文");
+}
+langBtn.addEventListener("click", () => {
+  lang = lang === "zh" ? "en" : "zh";
+  try { localStorage.setItem("rc-lang", lang); } catch(e){}
+  applyLang();
+});
+applyLang();
 </script>
 </body>
 </html>
