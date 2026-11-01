@@ -50,6 +50,15 @@
   ::selection{background:var(--lime);color:var(--ink)}
   .wrap{max-width:1280px;margin:0 auto;padding-left:clamp(20px,4vw,48px);padding-right:clamp(20px,4vw,48px)}
 
+  /* ---------- top intro ---------- */
+  .top-intro{
+    margin:0;padding:9px clamp(16px,4vw,48px);
+    background:var(--ink);color:var(--paper);
+    font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;line-height:1.6;
+    text-align:center;position:relative;z-index:60;
+  }
+  .top-intro b{font-weight:700;color:var(--lime)}
+
   /* ---------- top bar ---------- */
   .topbar{
     position:sticky;top:0;z-index:50;
@@ -384,6 +393,8 @@
 </style>
 </head>
 <body id="top">
+
+<p class="top-intro"><b>RoamChina</b> · 一个能装进 iPhone 的原生旅行 App：Pico 用三个问题排好整趟北京行程，跟着地图走，拍菜单和路牌直接翻译。</p>
 
 <header class="topbar">
   <a class="brand" href="#top" aria-label="RoamChina 首页">
