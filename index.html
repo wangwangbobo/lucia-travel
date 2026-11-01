@@ -256,55 +256,6 @@
   .tour-hint{margin-top:26px;font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:var(--ink3);display:flex;align-items:center;gap:7px}
   .key{display:inline-grid;place-items:center;min-width:19px;height:19px;padding:0 4px;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;background:var(--paper);font-size:9px;color:var(--ink2)}
 
-  /* ---------- design system ---------- */
-  .system{background:var(--paper-warm);border-top:1.2px solid var(--ink);border-bottom:1.2px solid var(--ink)}
-  .system-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:18px}
-  .card{
-    background:var(--paper);border:1.3px solid var(--ink);border-radius:24px;padding:clamp(18px,2.2vw,26px);
-    box-shadow:5px 6px 0 rgba(25,23,16,.1);
-  }
-  .card-eyebrow{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink3);display:flex;justify-content:space-between;gap:10px}
-  .card-eyebrow span:last-child{color:var(--ink)}
-  .card h3{font-size:19px;font-weight:900;letter-spacing:-.02em;margin:10px 0 0}
-  .colors-card{grid-column:span 7}
-  .type-card{grid-column:span 5;background:var(--mustard-soft)}
-  .swatches{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-top:20px}
-  .swatch{min-width:0}
-  .swatch .block{height:52px;border:1.2px solid var(--ink);border-radius:11px}
-  .swatch b{display:block;font-size:9.5px;margin-top:7px;font-weight:700;letter-spacing:0}
-  .swatch small{display:block;font-family:var(--mono);font-size:8px;color:var(--ink3);margin-top:2px;letter-spacing:.03em}
-  .type-sample{font-size:clamp(26px,3vw,34px);font-weight:900;letter-spacing:-.04em;line-height:1.2;margin-top:22px}
-  .type-sample em{font-style:normal;color:var(--accent)}
-  .type-meta{font-family:var(--mono);font-size:8.5px;letter-spacing:.14em;color:var(--ink3);margin-top:10px;text-transform:uppercase}
-  .type-card p{font-size:12px;line-height:1.75;color:var(--ink2);margin:16px 0 0}
-  .mono-sample{font-family:var(--mono);font-size:9px;letter-spacing:.18em;color:var(--ink2);margin-top:16px;text-transform:uppercase}
-  .components-card{grid-column:span 12;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
-  .demo{
-    position:relative;min-height:132px;padding:16px;border:1.1px solid var(--line);border-radius:16px;
-    background:rgba(244,236,220,.5);display:flex;flex-direction:column;justify-content:center;align-items:center;gap:12px;
-  }
-  .demo-label{position:absolute;left:12px;top:9px;font-family:var(--mono);font-size:7.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3)}
-  .demo-sticker{
-    font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
-    background:var(--mustard);border:1.1px solid var(--ink);border-radius:4px;padding:5px 8px;
-    box-shadow:2px 2px 0 rgba(25,23,16,.85);transform:rotate(-4deg);
-  }
-  .demo-btn{
-    font-size:11.5px;font-weight:700;padding:11px 20px;border-radius:999px;
-    background:var(--lime);border:1.2px solid var(--ink);box-shadow:3px 3px 0 rgba(25,23,16,.85);
-  }
-  .demo-tags{display:flex;flex-wrap:wrap;justify-content:center;gap:5px}
-  .demo-tag{font-size:8.5px;font-weight:600;padding:3px 8px;border-radius:999px;border:1px solid var(--ink);background:var(--paper)}
-  .demo-tag.pink{background:var(--pink-soft)}
-  .demo-tag.sky{background:var(--sky-soft)}
-  .ring{
-    width:64px;height:64px;border-radius:50%;border:1.2px solid var(--ink);
-    background:conic-gradient(var(--ink) 0 50%,rgba(255,252,242,.7) 50% 100%);
-    display:grid;place-items:center;position:relative;
-  }
-  .ring:before{content:"";position:absolute;inset:5px;border-radius:50%;background:var(--lime)}
-  .ring span{position:relative;font-size:12px;font-weight:900}
-
   /* ---------- gallery ---------- */
   .gallery-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap}
   .gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(228px,1fr));gap:clamp(16px,2.2vw,24px)}
@@ -443,7 +394,6 @@
   <nav class="topnav" aria-label="页面导航">
     <a href="#install">安装</a>
     <a href="#tour">界面</a>
-    <a href="#system">设计语言</a>
     <a href="#screens">全部屏幕</a>
   </nav>
   <a class="gh-btn" href="https://github.com/wangwangbobo/lucia-travel" target="_blank" rel="noopener">
@@ -558,54 +508,11 @@
     </div>
   </section>
 
-  <!-- SYSTEM -->
-  <section class="system" id="system">
-    <div class="wrap section" style="padding-top:clamp(56px,7vw,96px);padding-bottom:clamp(56px,7vw,96px)">
-      <div class="section-head">
-        <div class="eyebrow">02 / Design system</div>
-        <h2>奶油纸、墨线，和<span class="scribble">一点荧光</span></h2>
-        <p>参考图最后收成一套系统：温暖的纸面、1.2pt 的墨色描边、硬偏移阴影，配粗黑标题、等宽小字眉标和贴纸。</p>
-      </div>
-      <div class="system-grid">
-        <div class="card colors-card">
-          <div class="card-eyebrow"><span>Color</span><span>10 tones</span></div>
-          <h3>纸色与荧光</h3>
-          <div class="swatches">
-            <div class="swatch"><div class="block" style="background:#F4ECDC"></div><b>奶油纸</b><small>#F4ECDC</small></div>
-            <div class="swatch"><div class="block" style="background:#FFFCF2"></div><b>纸面</b><small>#FFFCF2</small></div>
-            <div class="swatch"><div class="block" style="background:#191710"></div><b>墨</b><small>#191710</small></div>
-            <div class="swatch"><div class="block" style="background:#DDEB86"></div><b>荧光绿</b><small>#DDEB86</small></div>
-            <div class="swatch"><div class="block" style="background:#F2C14E"></div><b>芥末黄</b><small>#F2C14E</small></div>
-            <div class="swatch"><div class="block" style="background:#EE5B34"></div><b>珊瑚橙</b><small>#EE5B34</small></div>
-            <div class="swatch"><div class="block" style="background:#F3B1C6"></div><b>浅粉</b><small>#F3B1C6</small></div>
-            <div class="swatch"><div class="block" style="background:#8CA3E8"></div><b>长春花蓝</b><small>#8CA3E8</small></div>
-            <div class="swatch"><div class="block" style="background:#B7DFC0"></div><b>薄荷</b><small>#B7DFC0</small></div>
-            <div class="swatch"><div class="block" style="background:#BADCF0"></div><b>天蓝</b><small>#BADCF0</small></div>
-          </div>
-        </div>
-        <div class="card type-card">
-          <div class="card-eyebrow"><span>Type</span><span>Display / Mono</span></div>
-          <h3>重标题，小眉标</h3>
-          <div class="type-sample">还有 <em>6</em> 件小事</div>
-          <div class="type-meta">Display 900 · -4% tracking</div>
-          <p>中文用粗黑字压住画面，英文小字用等宽字体做注脚。两者之间的留白，就是整套界面的呼吸。</p>
-          <div class="mono-sample">MAKE IT EASY · 3 DAYS TO GO</div>
-        </div>
-        <div class="card components-card">
-          <div class="demo"><span class="demo-label">Sticker</span><span class="demo-sticker">Local favorite</span></div>
-          <div class="demo"><span class="demo-label">Button</span><span class="demo-btn">加入清单</span></div>
-          <div class="demo"><span class="demo-label">Tags</span><div class="demo-tags"><span class="demo-tag">家庭</span><span class="demo-tag pink">本地人常去</span><span class="demo-tag sky">♥ 2.3k</span></div></div>
-          <div class="demo"><span class="demo-label">Progress</span><div class="ring"><span>50%</span></div></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <!-- GALLERY -->
   <section class="wrap section" id="screens">
     <div class="section-head gallery-head">
       <div>
-        <div class="eyebrow">03 / All screens</div>
+        <div class="eyebrow">02 / All screens</div>
         <h2>全部屏幕，<span class="scribble">点开看细节</span></h2>
         <p>26 张高清界面截图，点击任意一张放大。</p>
       </div>
