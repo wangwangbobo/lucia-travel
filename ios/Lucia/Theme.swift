@@ -98,7 +98,8 @@ struct Eyebrow: View {
     let text: String
     var color: Color = Palette.ink3
     var body: some View {
-        Text(text.uppercased())
+        Text(LocalizedStringKey(text))
+            .textCase(.uppercase)
             .font(LuciaType.eyebrow())
             .tracking(1.6)
             .foregroundStyle(color)
@@ -143,13 +144,84 @@ struct TagView: View {
     let text: String
     var style: TagStyle = .neutral
     var body: some View {
-        Text(text)
+        Text(LocalizedStringKey(text))
             .font(.system(size: 9, weight: .bold))
             .foregroundStyle(style.foreground)
             .padding(.horizontal, 7.5)
             .padding(.vertical, 4)
             .background(Capsule().fill(style.background))
             .overlay(Capsule().strokeBorder(style.border, lineWidth: 1))
+    }
+}
+
+/// Optional free-text box under the travel-style questions. Shared by the
+/// onboarding planner and the trip-page retake so both stay in sync.
+struct QuizNoteBox: View {
+    @Binding var text: String
+    var compact = false
+    @FocusState private var focused: Bool
+
+    private var filled: Bool {
+        !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 7) {
+            HStack(spacing: 6) {
+                Text(verbatim: "+")
+                    .font(.system(size: 10, weight: .heavy, design: .monospaced))
+                    .foregroundStyle(filled ? Palette.ink : Palette.ink3)
+                    .frame(width: 17, height: 17)
+                    .background(Circle().fill(filled ? Palette.lime : Color.clear))
+                    .overlay(
+                        Circle().strokeBorder(
+                            filled ? Palette.ink : Palette.ink.opacity(0.24),
+                            style: StrokeStyle(lineWidth: 1, dash: filled ? [] : [2.2, 2])
+                        )
+                    )
+
+                Text("Anything else?")
+                    .font(.system(size: compact ? 10.5 : 10, weight: .bold))
+                    .foregroundStyle(Palette.ink)
+
+                Spacer(minLength: 0)
+
+                Text("Optional")
+                    .font(.system(size: 6.5, weight: .bold, design: .monospaced))
+                    .tracking(0.7)
+                    .foregroundStyle(Palette.ink3)
+            }
+
+            TextField("Must-sees, pace, kids, food allergies…", text: $text, axis: .vertical)
+                .lineLimit(2...4)
+                .focused($focused)
+                .font(.system(size: compact ? 10.5 : 9.5, weight: .medium))
+                .foregroundStyle(Palette.ink)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 7)
+                .background(
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .fill(Palette.paper)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .strokeBorder(focused ? Palette.ink : Palette.ink.opacity(0.28), lineWidth: focused ? 1.2 : 1)
+                )
+                .onChange(of: text) { _, newValue in
+                    if newValue.count > 140 { text = String(newValue.prefix(140)) }
+                }
+        }
+        .padding(.horizontal, 9)
+        .padding(.vertical, 9)
+        .background(
+            RoundedRectangle(cornerRadius: 13, style: .continuous)
+                .fill(Palette.paperWarm)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 13, style: .continuous)
+                .strokeBorder(filled ? Palette.ink.opacity(0.4) : Palette.ink.opacity(0.13), lineWidth: 1)
+        )
+        .animation(.easeOut(duration: 0.2), value: filled)
     }
 }
 
@@ -165,7 +237,8 @@ struct StickerLabel: View {
             if let icon {
                 Image(systemName: icon).font(.system(size: 8, weight: .bold))
             }
-            Text(text.uppercased())
+            Text(LocalizedStringKey(text))
+                .textCase(.uppercase)
                 .font(.system(size: 8.5, weight: .bold, design: .monospaced))
                 .tracking(0.6)
         }
@@ -457,12 +530,20 @@ struct IconCircleButton: View {
 struct SectionHeading: View {
     var title: String
     var index: String? = nil
+    var icon: String? = nil
     var trailing: String? = nil
     var trailingAction: (() -> Void)? = nil
 
     var body: some View {
         HStack(alignment: .center, spacing: 8) {
-            if let index {
+            if let icon {
+                Image(systemName: icon)
+                    .font(.system(size: 10.5, weight: .bold))
+                    .foregroundStyle(Palette.ink)
+                    .frame(width: 22, height: 22)
+                    .background(Circle().fill(Palette.lime))
+                    .overlay(Circle().strokeBorder(Palette.ink, lineWidth: 1))
+            } else if let index {
                 Text(index)
                     .font(.system(size: 9, weight: .bold, design: .monospaced))
                     .foregroundStyle(Palette.ink)
@@ -470,7 +551,7 @@ struct SectionHeading: View {
                     .background(Circle().fill(Palette.lime))
                     .overlay(Circle().strokeBorder(Palette.ink, lineWidth: 1))
             }
-            Text(title)
+            Text(LocalizedStringKey(title))
                 .font(.system(size: 17, weight: .heavy))
                 .foregroundStyle(Palette.ink)
                 .tracking(-0.2)
@@ -481,7 +562,7 @@ struct SectionHeading: View {
                     trailingAction?()
                 } label: {
                     HStack(spacing: 3) {
-                        Text(trailing)
+                        Text(LocalizedStringKey(trailing))
                         if trailingAction != nil {
                             Image(systemName: "arrow.up.right").font(.system(size: 8, weight: .black))
                         }

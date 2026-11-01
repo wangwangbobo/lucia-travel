@@ -1,5 +1,5 @@
 #!/bin/bash
-# 构建一份未签名的 Lucia.ipa（用于 Sideloadly / AltStore 侧载重签）
+# 构建一份未签名的 RoamChina.ipa（用于 Sideloadly / AltStore 侧载重签）
 # 用法：在 ios/ 目录执行 ./build-ipa.sh
 set -euo pipefail
 
@@ -7,8 +7,9 @@ cd "$(dirname "$0")"
 
 BUILD_DIR=".build-device"
 DIST="distribution"
-APP_NAME="Lucia"
-VERSION="1.0.0"
+APP_NAME="Lucia"          # 工程 target 名，产物仍是 Lucia.app
+DISPLAY_NAME="RoamChina"  # 桌面显示名，见 Info.plist 的 CFBundleDisplayName
+VERSION="1.1.0"
 
 echo "==> 构建真机 Release（未签名）"
 xcodebuild -project "${APP_NAME}.xcodeproj" -scheme "${APP_NAME}" \
@@ -42,6 +43,7 @@ PLIST="${APP}/Info.plist"
 
 echo "==> 打包 IPA"
 cd "${DIST}"
-zip -qry "${APP_NAME}-${VERSION}-unsigned.ipa" Payload
-shasum -a 256 "${APP_NAME}-${VERSION}-unsigned.ipa"
-echo "==> 完成：${DIST}/${APP_NAME}-${VERSION}-unsigned.ipa"
+IPA="${DISPLAY_NAME}-${VERSION}-unsigned.ipa"
+zip -qry "${IPA}" Payload
+shasum -a 256 "${IPA}"
+echo "==> 完成：${DIST}/${IPA}"

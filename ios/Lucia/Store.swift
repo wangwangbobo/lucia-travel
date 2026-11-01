@@ -8,8 +8,14 @@ final class AppModel: ObservableObject {
     @Published var tab: Tab = .trip
     @Published var checklistOpen = false
     @Published var assistantOpen = false
-    @Published var assistantContext = Tab.trip.assistantContext
+    @Published var assistantContext = "New trip · Planning with Pico"
     @Published var notesOpen = false
+    @Published var onboarding = true
+    @Published var planBuilt = false
+    @Published var firstRunFlow = true
+    @Published var lang: AppLanguage = .en
+    @Published var recapOpen = false
+    @Published var recapSlide = 0
 
     // MARK: Trip
     @Published var reminderDismissed = false
@@ -17,13 +23,31 @@ final class AppModel: ObservableObject {
     @Published var toast: Toast?
 
     // MARK: Plan
-    @Published var routeName = "北京中轴线 · 草稿"
+    @Published var routeName = "Central Axis · Draft"
     @Published var stops: [RouteStop]
     @Published var selectedStopID: UUID?
     @Published var layer: MapLayer = .mine
     @Published var aiSuggestionVisible = true
     @Published var routeApplied = false
     @Published var mapEditMode = false
+    @Published var pendingSimilar = false
+
+    // MARK: Merged trip editor
+    @Published var tripDays: [TripDay] = []
+    @Published var tripStartDate: Date = AppModel.defaultTripStart
+    @Published var tripDay = 0
+    @Published var tripEdit = false
+    @Published var tripSaved = false
+    @Published var tripDirty = false
+    @Published var tripLive = false
+    @Published var liveStop = 0
+
+    let tripSuggestions: [TripSuggestion] = [
+        TripSuggestion(name: "Metal Hands · Qianmen", meta: "Coffee · 45 min", x: 0.66, y: 0.74),
+        TripSuggestion(name: "Siji Minfu · Duck", meta: "Lunch · 1.5 hr", x: 0.60, y: 0.63),
+        TripSuggestion(name: "Beihai Park", meta: "Boats · 1.5 hr", x: 0.34, y: 0.44),
+        TripSuggestion(name: "Temple of Heaven", meta: "Sights · 1.5 hr", x: 0.44, y: 0.90)
+    ]
 
     // MARK: Forum
     @Published var forumFilter: ForumFilter = .all
@@ -31,7 +55,9 @@ final class AppModel: ObservableObject {
     @Published var joinedEvent = false
     @Published var joinedEventIDs: Set<UUID> = []
     @Published var savedPlaces: Set<UUID> = []
+    @Published var savedPostIDs: Set<UUID> = []
     @Published var localEvents: [LocalEvent]
+    @Published var forumPosts: [ForumPost]
 
     // MARK: Translate
     @Published var translateMode: TranslateMode = .live
@@ -45,70 +71,112 @@ final class AppModel: ObservableObject {
 
     // MARK: Me
     @Published var notificationsOn = true
+    @Published var attractions: [AttractionBooking]
 
     // MARK: Chat
     @Published var chatMessages: [ChatMessage] = []
     @Published var chatDraft = ""
     @Published var chatThinking = false
 
+    // MARK: Plan builder (shared with the trip page style check)
+    @Published var quizDays: String? = nil
+    @Published var quizStyle: String? = nil
+    @Published var quizTheme: String? = nil
+    @Published var quizNote = ""
+
+    var quizAnswered: Int {
+        [quizDays, quizStyle, quizTheme].compactMap { $0 }.count
+    }
+
+    var quizPersona: TravelPersona? {
+        guard let days = quizDays, let style = quizStyle, let theme = quizTheme else { return nil }
+        let map: [String: (String, String)] = [
+            "Slow culture": ("The Slow Culture Wanderer", "safari"),
+            "Food first": ("The Table-First Wanderer", "fork.knife"),
+            "Outdoors": ("The Open-Air Rambler", "figure.walk"),
+            "Night owl": ("The After-Dark Flâneur", "star.fill"),
+            "Family friendly": ("The Easy-Going Family Wanderer", "person.2.fill"),
+            "Budget smart": ("The Shrewd City Wanderer", "ticket")
+        ]
+        let base = map[style] ?? ("The Slow Culture Wanderer", "safari")
+        let axisThemes = ["Imperial history", "Hutongs & coffee", "Night markets"]
+        let fit = axisThemes.contains(theme) ? "Central Axis" : "Imperial Gardens"
+        let note = quizNote.trimmingCharacters(in: .whitespacesAndNewlines)
+        return TravelPersona(
+            title: base.0,
+            icon: base.1,
+            meta: "\(days) · \(style) · \(theme)",
+            fit: fit,
+            note: String(note.prefix(140))
+        )
+    }
+
+    var planLength: Int {
+        if quizDays == "2–3 days" { return 3 }
+        if quizDays == "6+ days" { return 6 }
+        return 4
+    }
+
+    var showPlanBuilder: Bool { onboarding && !planBuilt }
+
     // MARK: Static demo content
     let forumRoutes: [ForumRoute] = [
-        ForumRoute(title: "2 天胡同慢走 · 8 站", author: "@Lina", meta: "4.8 分 · 收藏 1.2k", tags: ["轻松", "咖啡", "拍照"], stops: 8, distance: "6.4 km", likes: "1.2k"),
-        ForumRoute(title: "北京中轴线 · 半日", author: "@Ken", meta: "4.9 分 · 收藏 2.1k", tags: ["经典", "步行", "日落"], stops: 6, distance: "4.2 km", likes: "2.1k"),
-        ForumRoute(title: "鼓楼到后海 · 夜走", author: "@阿哲", meta: "4.7 分 · 收藏 968", tags: ["夜游", "酒吧", "轻松"], stops: 5, distance: "3.8 km", likes: "968")
+        ForumRoute(title: "Two days in the hutongs · 8 stops", author: "@Lina", meta: "4.8 · 1.2k saves", tags: ["Easy", "Coffee", "Photo spots"], stops: 8, distance: "6.4 km", likes: "1.2k"),
+        ForumRoute(title: "Central Axis · Half day", author: "@Ken", meta: "4.9 · 2.1k saves", tags: ["Classic", "Walk", "Sunset"], stops: 6, distance: "4.2 km", likes: "2.1k"),
+        ForumRoute(title: "Drum Tower to Houhai · After dark", author: "@Zhe", meta: "4.7 · 968 saves", tags: ["Night", "Bars", "Easy"], stops: 5, distance: "3.8 km", likes: "968")
     ]
 
     let forumPlaces: [ForumPlace] = [
-        ForumPlace(title: "四季民福 · 故宫店", subtitle: "11:00 前到不排队 · 烤鸭", price: "¥150", tags: ["家庭", "本地人常去"], kind: .restaurant, likes: "2.3k", symbol: "fork.knife", tint: 0, heat: 96, area: "东城 · 故宫", note: "下午三点以后去几乎不用等位，鸭皮还是脆的。", bestTime: "11:00 前 / 15:00 后"),
-        ForumPlace(title: "满恒记 · 牛街", subtitle: "手切鲜羊肉 · 铜锅涮肉", price: "¥95", tags: ["本地", "排队"], kind: .restaurant, likes: "1.9k", symbol: "flame", tint: 6, heat: 93, area: "西城 · 牛街", note: "手切羊肉配麻酱，本地人排队也愿意等。", bestTime: "17:00 前取号"),
-        ForumPlace(title: "胖妹面庄 · 北新桥", subtitle: "小面 · 现炸酥肉", price: "¥45", tags: ["本地", "快吃"], kind: .restaurant, likes: "886", symbol: "takeoutbag.and.cup.and.straw", tint: 1, heat: 88, area: "东城 · 北新桥", note: "小面要少辣，酥肉现炸的最好吃。", bestTime: "工作日 14:00"),
-        ForumPlace(title: "Metal Hands · 前门", subtitle: "胡同咖啡 · 自家烘焙", price: "¥45", tags: ["咖啡", "安静"], kind: .restaurant, likes: "1.1k", symbol: "cup.and.saucer.fill", tint: 5, heat: 81, area: "东城 · 前门", note: "巷子里的安静咖啡馆，下午光线最好。", bestTime: "15:00–17:00"),
-        ForumPlace(title: "稻香村 · 本地人伴手礼", subtitle: "避开网红款 · 8 件", price: "¥50–120", tags: ["伴手礼", "可托运"], kind: .gift, likes: "1.7k", symbol: "gift", tint: 2, heat: 86, area: "各城区门店", note: "散装点心比礼盒更值得买，记得要新鲜日期。", bestTime: "上午补货"),
-        ForumPlace(title: "故宫文创 · 冰箱贴", subtitle: "角楼系列 · 限定色", price: "¥39", tags: ["轻便", "限定"], kind: .gift, likes: "604", symbol: "sparkles", tint: 3, heat: 78, area: "故宫 · 神武门", note: "角楼冰箱贴经常断货，进门先买。", bestTime: "开馆后 1 小时"),
-        ForumPlace(title: "同仁堂 · 酸梅汤原料", subtitle: "煮一壶老北京的夏天", price: "¥38", tags: ["可托运", "轻便"], kind: .gift, likes: "512", symbol: "leaf", tint: 7, heat: 74, area: "东城 · 大栅栏", note: "夏天煮一壶，比瓶装饮料更像北京。", bestTime: "任何时间"),
-        ForumPlace(title: "景山看日落", subtitle: "17:00 前上山 · 万春亭", price: "免费", tags: ["日落", "俯拍故宫"], kind: .spot, likes: "3.4k", symbol: "sun.horizon", tint: 4, heat: 94, area: "东城 · 景山", note: "17:00 前上万春亭，能拍到故宫全景。", bestTime: "日落前 40 分钟"),
-        ForumPlace(title: "天坛公园", subtitle: "回音壁 · 古柏与祈年殿", price: "¥34", tags: ["建筑", "人少"], kind: .spot, likes: "2.8k", symbol: "building.columns", tint: 8, heat: 90, area: "东城 · 天坛", note: "从南门进，回音壁人少的时候最有意思。", bestTime: "开园后 1 小时"),
-        ForumPlace(title: "北海公园", subtitle: "划船看白塔 · 亲子友好", price: "¥10", tags: ["亲子", "划船"], kind: .spot, likes: "2.1k", symbol: "sailboat", tint: 9, heat: 82, area: "西城 · 北海", note: "租一条船，从湖上看白塔最舒服。", bestTime: "15:00 后")
+        ForumPlace(title: "Siji Minfu · Forbidden City", subtitle: "Arrive before 11:00 · Peking duck", price: "¥150", tags: ["Family", "Local favorite"], kind: .restaurant, likes: "2.3k", symbol: "fork.knife", tint: 0, heat: 96, area: "Dongcheng · Forbidden City", note: "After 3pm there's barely a wait, and the skin stays crisp.", bestTime: "Before 11:00 / after 15:00"),
+        ForumPlace(title: "Man Heng Ji · Niujie", subtitle: "Hand-cut lamb · copper-pot hotpot", price: "¥95", tags: ["Local", "Queue"], kind: .restaurant, likes: "1.9k", symbol: "flame", tint: 6, heat: 93, area: "Xicheng · Niujie", note: "Hand-cut lamb with sesame dip — even locals happily queue.", bestTime: "Take a number before 17:00"),
+        ForumPlace(title: "Pangmei Noodles · Beixinqiao", subtitle: "Chongqing noodles · crispy pork", price: "¥45", tags: ["Local", "Quick bite"], kind: .restaurant, likes: "886", symbol: "takeoutbag.and.cup.and.straw", tint: 1, heat: 88, area: "Dongcheng · Beixinqiao", note: "Ask for mild heat; the crispy pork is best fresh from the wok.", bestTime: "Weekdays 14:00"),
+        ForumPlace(title: "Metal Hands · Qianmen", subtitle: "Hutong coffee · house roast", price: "¥45", tags: ["Coffee", "Quiet"], kind: .restaurant, likes: "1.1k", symbol: "cup.and.saucer.fill", tint: 5, heat: 81, area: "Dongcheng · Qianmen", note: "A quiet café down a side lane, best light in the afternoon.", bestTime: "15:00–17:00"),
+        ForumPlace(title: "Daoxiangcun · Local gifts", subtitle: "Skip the gift boxes · 8 picks", price: "¥50–120", tags: ["Gifts", "Check-in"], kind: .gift, likes: "1.7k", symbol: "gift", tint: 2, heat: 86, area: "Branches citywide", note: "Loose pastries beat the gift boxes — check the date.", bestTime: "Morning restock"),
+        ForumPlace(title: "Palace Museum Shop · Magnets", subtitle: "Corner-tower series · limited colors", price: "¥39", tags: ["Light", "Limited"], kind: .gift, likes: "604", symbol: "sparkles", tint: 3, heat: 78, area: "Forbidden City · Shenwu Gate", note: "The corner-tower magnet sells out, so buy it on the way in.", bestTime: "1 hr after opening"),
+        ForumPlace(title: "Tongrentang · Sour plum mix", subtitle: "Brew a Beijing summer", price: "¥38", tags: ["Check-in", "Light"], kind: .gift, likes: "512", symbol: "leaf", tint: 7, heat: 74, area: "Dongcheng · Dashilar", note: "Brewed at home, it tastes more like Beijing than any bottle.", bestTime: "Any time"),
+        ForumPlace(title: "Sunset at Jingshan", subtitle: "Up before 17:00 · Wanchun Pavilion", price: "Free", tags: ["Sunset", "Palace views"], kind: .spot, likes: "3.4k", symbol: "sun.horizon", tint: 4, heat: 94, area: "Dongcheng · Jingshan", note: "Reach Wanchun Pavilion before 17:00 for the full palace view.", bestTime: "40 min before sunset"),
+        ForumPlace(title: "Temple of Heaven", subtitle: "Echo Wall · old cypresses", price: "¥34", tags: ["Architecture", "Quiet"], kind: .spot, likes: "2.8k", symbol: "building.columns", tint: 8, heat: 90, area: "Dongcheng · Temple of Heaven", note: "Enter from the south gate; the Echo Wall is best when quiet.", bestTime: "1 hr after opening"),
+        ForumPlace(title: "Beihai Park", subtitle: "Boats and the White Dagoba", price: "¥10", tags: ["Family", "Boating"], kind: .spot, likes: "2.1k", symbol: "sailboat", tint: 9, heat: 82, area: "Xicheng · Beihai", note: "Rent a boat — the White Dagoba looks best from the water.", bestTime: "After 15:00")
     ]
 
     let forumEvent = ForumEvent(
-        title: "胡同夜市 · 免费入场",
-        subtitle: "手作、黑胶与小吃，本地摊主出摊",
-        date: "10/18 周六 · 18:00",
-        place: "钟鼓楼广场 · 距酒店 35 分钟",
+        title: "Hutong Night Market · Free entry",
+        subtitle: "Handmade goods, vinyl and snacks from local stalls",
+        date: "10/18 Sat · 18:00",
+        place: "Drum & Bell Towers square · 35 min from hotel",
         attendees: 128
     )
 
     let similarRoutes: [SimilarRoute] = [
         SimilarRoute(
-            title: "北京中轴线 · 经典半日",
+            title: "Central Axis · Classic half day",
             author: "@Ken",
             match: 94,
             stops: 6,
             distance: "4.2 km",
-            duration: "约 5 小时",
-            tags: ["经典", "步行", "日落"],
-            highlight: "和你的 6 个点位重合 5 个，故宫段顺序一致。"
+            duration: "~5 hr",
+            tags: ["Classic", "Walk", "Sunset"],
+            highlight: "Matches 5 of your 6 stops, with the palace section in the same order."
         ),
         SimilarRoute(
-            title: "胡同咖啡慢走 · 8 站",
+            title: "Hutong coffee crawl · 8 stops",
             author: "@Lina",
             match: 87,
             stops: 8,
             distance: "6.4 km",
-            duration: "约一整天",
-            tags: ["咖啡", "拍照", "轻松"],
-            highlight: "把南锣鼓巷换成 3 家咖啡店，适合下午出发。"
+            duration: "~a full day",
+            tags: ["Coffee", "Photo spots", "Easy"],
+            highlight: "Swaps Nanluoguxiang for three coffee shops — good for an afternoon start."
         ),
         SimilarRoute(
-            title: "景山落日 + 什刹海夜走",
-            author: "@阿哲",
+            title: "Jingshan sunset + Shichahai at night",
+            author: "@Zhe",
             match: 79,
             stops: 5,
             distance: "3.8 km",
-            duration: "约 3 小时",
-            tags: ["夜游", "日落", "本地"],
-            highlight: "保留你的景山日落，回程沿什刹海走，少一次折返。"
+            duration: "~3 hr",
+            tags: ["Night", "Sunset", "Local"],
+            highlight: "Keeps your Jingshan sunset, then walks back along Shichahai — one backtrack fewer."
         )
     ]
 
@@ -138,6 +206,8 @@ final class AppModel: ObservableObject {
             LiveMessage(zh: "直走两个路口，在红绿灯处左转。", en: "Go straight for two blocks, then turn left at the lights.", isMine: true)
         ]
         localEvents = Self.makeLocalEvents()
+        forumPosts = Self.makeForumPosts()
+        attractions = Self.makeAttractions()
         applySavedChecklist()
         applyLaunchScreen()
     }
@@ -146,12 +216,22 @@ final class AppModel: ObservableObject {
     private func applyLaunchScreen() {
         #if DEBUG
         let args = ProcessInfo.processInfo.arguments
+        if args.contains("-zh") { lang = .zh }
+        if let index = args.firstIndex(of: "-tripstart"), args.indices.contains(index + 1) {
+            let formatter = DateFormatter()
+            formatter.locale = Locale(identifier: "en_US_POSIX")
+            formatter.calendar = Self.tripCalendar
+            formatter.dateFormat = "yyyy-MM-dd"
+            if let date = formatter.date(from: args[index + 1]) {
+                tripStartDate = Self.tripCalendar.startOfDay(for: date)
+            }
+        }
         if args.contains("-plan") || args.contains("-similar") { tab = .plan }
         if args.contains("-mapedit") {
             tab = .plan
             mapEditMode = true
             aiSuggestionVisible = false
-            selectedStopID = stops.first(where: { $0.name == "故宫博物院" })?.id
+            selectedStopID = stops.first(where: { $0.name == "Forbidden City" })?.id
         }
         if args.contains("-forum") { tab = .forum }
         if args.contains("-translate") { tab = .translate }
@@ -185,10 +265,65 @@ final class AppModel: ObservableObject {
             notesOpen = true
         }
         if args.contains("-checklist") { checklistOpen = true }
+        if args.contains("-quizdone") {
+            quizDays = quizDays ?? "4–5 days"
+            quizStyle = quizStyle ?? "Food first"
+            quizTheme = quizTheme ?? "Hutongs & coffee"
+        }
+        if let index = args.firstIndex(of: "-quiznote"), args.indices.contains(index + 1) {
+            quizNote = args[index + 1]
+        }
+        if args.contains("-plantrip") {
+            tab = .trip
+            quizDays = "6+ days"
+            quizStyle = "Food first"
+            quizTheme = "Hutongs & coffee"
+            onboarding = false
+            planBuilt = true
+            assistantContext = "Plan · Central Axis · \(planLength) days"
+            routeName = "Central Axis · New plan"
+        }
+        if args.contains("-planbuilt") {
+            quizDays = "4–5 days"
+            quizStyle = "Food first"
+            quizTheme = "Hutongs & coffee"
+            onboarding = false
+            planBuilt = true
+            assistantContext = "Plan · Central Axis · \(planLength) days"
+            routeName = "Central Axis · New plan"
+            if let persona = quizPersona {
+                let note = quizNote.trimmingCharacters(in: .whitespacesAndNewlines)
+                chatMessages = [
+                    ChatMessage(role: .assistant, text: "Hi, I'm Pico. Tell me what kind of trip you like and I'll build your first Beijing plan — route order, timing and all."),
+                    ChatMessage(role: .user, text: note.isEmpty ? "4–5 days · Food first · Hutongs & coffee" : "4–5 days · Food first · Hutongs & coffee · \(note)"),
+                    ChatMessage(role: .assistant, text: planNarrative(persona), card: .plan)
+                ]
+            }
+            assistantOpen = true
+        }
         if args.contains("-assistant") {
-            assistantContext = tab.assistantContext
+            assistantContext = onboarding ? "New trip · Planning with Pico" : tab.assistantContext
             seedAssistant()
             assistantOpen = true
+        }
+        if args.contains("-autobuild") {
+            quizDays = "4–5 days"
+            quizStyle = "Food first"
+            quizTheme = "Hutongs & coffee"
+            assistantContext = "New trip · Planning with Pico"
+            seedAssistant()
+            assistantOpen = true
+            Task { @MainActor [weak self] in
+                try? await Task.sleep(for: .milliseconds(900))
+                self?.buildPlan()
+            }
+        }
+        if let index = args.firstIndex(of: "-ask"), args.indices.contains(index + 1) {
+            let question = args[index + 1]
+            Task { @MainActor [weak self] in
+                try? await Task.sleep(for: .milliseconds(1400))
+                self?.sendChat(question)
+            }
         }
         if args.contains("-place") || args.contains("-compose") { tab = .forum }
         if args.contains("-reorder") { tab = .plan }
@@ -196,7 +331,49 @@ final class AppModel: ObservableObject {
             tab = .translate
             translateMode = .offline
         }
+        if args.contains("-recap") {
+            tab = .trip
+            onboarding = false
+            planBuilt = true
+            ensureTripDays()
+            recapOpen = true
+            if let index = args.firstIndex(of: "-recapslide"),
+               args.indices.contains(index + 1),
+               let value = Int(args[index + 1]) {
+                recapSlide = min(max(value, 0), 7)
+            }
+        }
+        if planBuilt {
+            ensureTripDays()
+            if args.contains("-tripday2") { tripDay = min(1, tripDays.count - 1) }
+            if args.contains("-tripday3") { tripDay = min(2, tripDays.count - 1) }
+            if args.contains("-tripedit") {
+                tripSaved = true
+                tripEdit = true
+                aiSuggestionVisible = false
+            }
+            if args.contains("-tripsaved") {
+                tripSaved = true
+                tripDirty = false
+                aiSuggestionVisible = false
+            }
+            if args.contains("-triplivedone") {
+                tripSaved = true
+                tripLive = true
+                liveStop = currentStops.count
+            } else if args.contains("-triplive3") {
+                tripSaved = true
+                tripLive = true
+                liveStop = min(3, max(0, currentStops.count - 1))
+            } else if args.contains("-triplive") {
+                tripSaved = true
+                tripLive = true
+                liveStop = 1
+            }
+        }
+        if args.contains("-closedock") { assistantOpen = false }
         #endif
+        firstRunFlow = onboarding && !planBuilt
     }
 
     // MARK: Checklist
@@ -232,31 +409,31 @@ final class AppModel: ObservableObject {
         withAnimation(.easeInOut(duration: 0.2)) { checklist[index].status = .done }
         Haptics.success()
         persistChecklist()
-        toast("已完成 · \(item.title)", icon: "checkmark.seal.fill")
+        toast("Done · \(item.title)", icon: "checkmark.seal.fill")
     }
 
     func bookForbiddenCity() {
-        if let index = checklist.firstIndex(where: { $0.title.hasPrefix("故宫门票") }) {
+        if let index = checklist.firstIndex(where: { $0.title.hasPrefix("Forbidden City tickets") }) {
             withAnimation { checklist[index].status = .done }
             persistChecklist()
         }
         Haptics.success()
-        toast("已锁定 10/15 09:00 · 成人 ×2", icon: "ticket.fill")
+        toast("Booked \(tripStamp(0).date) 09:00 · 2 adults", icon: "ticket.fill")
     }
 
     func aiRecheck() {
         let open = checklist.filter { $0.status != .done }.count
         Haptics.success()
         if open == 0 {
-            toast("12 项全部核对完成", icon: "checkmark.seal.fill")
+            toast("All 12 checks complete", icon: "checkmark.seal.fill")
         } else {
-            toast("复查完成 · \(open) 项待处理，已排好顺序", icon: "sparkles")
+            toast("Recheck done · \(open) to go, reordered", icon: "sparkles")
         }
     }
 
     func addToChecklist(title: String, meta: String, category: ChecklistCategory = .tickets, phase: ChecklistPhase = .before) {
         guard !checklist.contains(where: { $0.title == title }) else {
-            toast("清单里已有这一项", icon: "checkmark.circle.fill")
+            toast("Already on your list", icon: "checkmark.circle.fill")
             return
         }
         withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
@@ -267,22 +444,22 @@ final class AppModel: ObservableObject {
                     category: category,
                     phase: phase,
                     status: .action,
-                    actionLabel: "查看",
-                    tag: "新增",
+                    actionLabel: "View",
+                    tag: "New",
                     tagStyle: .accent
                 )
             )
         }
         Haptics.success()
         persistChecklist()
-        toast("已加入行前清单", icon: "text.badge.plus")
+        toast("Added to your pre-trip list", icon: "text.badge.plus")
     }
 
     var checklistSummary: String {
         let lines = checklist.map { item -> String in
             "\(item.status == .done ? "✓" : "○") \(item.title) — \(item.meta)"
         }
-        return "Lucia · 北京 4 天 3 晚 行前清单\n进度 \(doneCount)/\(totalCount)\n\n" + lines.joined(separator: "\n")
+        return "Pico · Beijing 4 days, 3 nights · Pre-trip checklist\nProgress \(doneCount)/\(totalCount)\n\n" + lines.joined(separator: "\n")
     }
 
     private func persistChecklist() {
@@ -316,7 +493,7 @@ final class AppModel: ObservableObject {
         }
         Haptics.tap()
         if mapEditMode {
-            toast("编辑点位 · 直接拖动地图上的编号", icon: "hand.draw.fill")
+            toast("Edit stops · drag the numbered pins", icon: "hand.draw.fill")
         }
     }
 
@@ -324,15 +501,17 @@ final class AppModel: ObservableObject {
         guard let index = stops.firstIndex(where: { $0.id == id }) else { return }
         stops[index].x = min(max(x, 0.06), 0.94)
         stops[index].y = min(max(y, 0.10), 0.90)
+        markTripEdited()
     }
 
     func didFinishMovingStop() {
+        markTripEdited()
         Haptics.success()
-        toast("点位已更新 · 路线已重新连好", icon: "map.fill")
+        toast("Stops updated · route redrawn", icon: "map.fill")
     }
 
     func applyRouteSuggestion() {
-        let order = ["天安门广场", "故宫博物院", "什刹海", "景山公园", "南锣鼓巷", "钟鼓楼"]
+        let order = ["Tiananmen Square", "Forbidden City", "Shichahai", "Jingshan Park", "Nanluoguxiang", "Drum & Bell Towers"]
         let times = ["09:00", "09:40", "13:00", "14:30", "16:00", "17:00"]
         var reordered: [RouteStop] = []
         for (index, name) in order.enumerated() {
@@ -346,14 +525,16 @@ final class AppModel: ObservableObject {
             routeApplied = true
             aiSuggestionVisible = false
         }
+        markTripEdited()
         Haptics.success()
-        toast("已应用 · 路线重算完成，少走 1.2 km", icon: "arrow.triangle.swap")
+        toast("Applied · route recalculated, 1.2 km shorter", icon: "arrow.triangle.swap")
     }
 
     func moveStops(from source: IndexSet, to destination: Int) {
         stops.move(fromOffsets: source, toOffset: destination)
         renumberStops()
-        toast("顺序已更新", icon: "arrow.up.arrow.down")
+        markTripEdited()
+        toast("Order updated", icon: "arrow.up.arrow.down")
     }
 
     private func renumberStops() {
@@ -369,24 +550,453 @@ final class AppModel: ObservableObject {
     }
 
     func copyRoute(named name: String) {
-        routeName = name + " · 副本"
+        routeName = name + " · Copy"
         routeApplied = false
         aiSuggestionVisible = true
         tab = .plan
         selectedStopID = stops.first?.id
         Haptics.success()
-        toast("已套用并生成独立副本", icon: "doc.on.doc.fill")
+        toast("Copied to your own route", icon: "doc.on.doc.fill")
     }
 
     func shareRoute() {
-        toast("路线分享链接已复制", icon: "link")
+        toast("Route link copied", icon: "link")
     }
 
     var routeSummary: String {
         let lines = stops.enumerated().map { index, stop in
             "\(index + 1). \(stop.name) · \(stop.time) · \(stop.duration)"
         }
-        return "\(routeName)\n6 站 · 4.2 km · 约 5 小时\n\n" + lines.joined(separator: "\n") + "\n\n来自 Lucia · 北京旅行计划"
+        return "\(routeName)\n6 stops · 4.2 km · ~5 hr\n\n" + lines.joined(separator: "\n") + "\n\nFrom Pico · Beijing trip plan"
+    }
+
+    // MARK: Merged trip editor
+
+    static let tripCalendar: Calendar = {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.locale = Locale(identifier: "en_US_POSIX")
+        return calendar
+    }()
+
+    static var defaultTripStart: Date {
+        var components = DateComponents()
+        components.year = 2026
+        components.month = 10
+        components.day = 15
+        components.hour = 12
+        return tripCalendar.date(from: components) ?? Date()
+    }
+
+    private static let tripMonthDay: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "MM/dd"
+        return formatter
+    }()
+
+    private static let tripWeekday: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "EEE"
+        return formatter
+    }()
+
+    private static let zhWeekdays: [String: String] = [
+        "Mon": "周一", "Tue": "周二", "Wed": "周三",
+        "Thu": "周四", "Fri": "周五", "Sat": "周六", "Sun": "周日"
+    ]
+
+    /// Month/day and short weekday for a trip day, counting from the editable start.
+    func tripStamp(_ index: Int, from start: Date? = nil) -> (date: String, week: String) {
+        let base = start ?? tripStartDate
+        let date = Self.tripCalendar.date(byAdding: .day, value: index, to: base) ?? base
+        return (Self.tripMonthDay.string(from: date), Self.tripWeekday.string(from: date))
+    }
+
+    func weekLabel(_ short: String) -> String {
+        lang == .zh ? (Self.zhWeekdays[short] ?? short) : short
+    }
+
+    func tripDateRange(count: Int? = nil, from start: Date? = nil) -> String {
+        let days = max(1, count ?? tripDayCount)
+        return "\(tripStamp(0, from: start).date) – \(tripStamp(days - 1, from: start).date)"
+    }
+
+    func tripDatesLine(count: Int) -> String {
+        "\(tripDateRange(count: count)) · \(lang == .zh ? "2 位旅行者" : "2 travelers")"
+    }
+
+    /// Localizes data-driven strings (place names, tags) that `Text` would render verbatim.
+    func say(_ text: String) -> String {
+        lang == .zh ? L10n.text(text, lang) : text
+    }
+
+    /// Localizes a composed trip meta line such as "6 stops · 4.2 km · ~5 hr".
+    func tripMeta(_ meta: String) -> String {
+        guard lang == .zh else { return meta }
+        return meta.components(separatedBy: " · ").map { part in
+            if part.hasSuffix(" stops"), let count = Int(part.dropLast(6)) {
+                return "\(count) 站"
+            }
+            if part.hasSuffix(" km walk") {
+                return part.replacingOccurrences(of: " km walk", with: " 公里步行")
+            }
+            if part.hasSuffix(" km on foot") {
+                return part.replacingOccurrences(of: " km on foot", with: " 公里步行")
+            }
+            if part.hasSuffix(" km") {
+                return part.replacingOccurrences(of: " km", with: " 公里")
+            }
+            if part.hasPrefix("~"), part.hasSuffix(" hr") {
+                let hours = part.dropFirst().dropLast(3)
+                return "约 \(hours) 小时"
+            }
+            if part == "~full day" || part == "full day" { return "约一整天" }
+            if part == "private car" || part == "private car both ways" { return "往返专车" }
+            if part.hasPrefix("Metro Line ") {
+                return "地铁 \(part.dropFirst(11)) 号线"
+            }
+            return L10n.text(part, lang)
+        }.joined(separator: " · ")
+    }
+
+    /// Moves the whole itinerary in place so edited stops and notes survive a date change.
+    func setTripStart(_ date: Date) {
+        let start = Self.tripCalendar.startOfDay(for: date)
+        guard !Self.tripCalendar.isDate(start, inSameDayAs: tripStartDate) else { return }
+        tripStartDate = start
+        guard !tripDays.isEmpty else { return }
+        for index in tripDays.indices {
+            let stamp = tripStamp(index, from: start)
+            tripDays[index].date = stamp.date
+            tripDays[index].week = stamp.week
+        }
+        Haptics.success()
+        toast(lang == .zh ? "日期已更新 · \(tripDatesLine(count: tripDays.count))" : "Dates moved · \(tripDatesLine(count: tripDays.count))", icon: "calendar")
+    }
+
+    var tripDayCount: Int { tripDays.isEmpty ? planLength : tripDays.count }
+
+    var currentTripDay: TripDay? {
+        tripDays.indices.contains(tripDay) ? tripDays[tripDay] : tripDays.first
+    }
+
+    var currentStops: [RouteStop] {
+        tripDay == 0 ? stops : (currentTripDay?.stops ?? stops)
+    }
+
+    func ensureTripDays() {
+        guard planBuilt else { return }
+        if tripDays.count != planLength {
+            tripDays = makeTripDays(stops: stops, count: planLength)
+            tripDay = min(tripDay, max(0, tripDays.count - 1))
+        }
+    }
+
+    func setCurrentStops(_ list: [RouteStop]) {
+        if tripDay == 0 {
+            stops = list
+        } else if tripDays.indices.contains(tripDay) {
+            tripDays[tripDay].stops = list
+        }
+    }
+
+    func markTripEdited() {
+        if tripSaved { tripDirty = true }
+    }
+
+    func selectTripDay(_ index: Int) {
+        guard tripDays.indices.contains(index) else { return }
+        Haptics.tap()
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.86)) {
+            tripDay = index
+            tripEdit = false
+            selectedStopID = nil
+        }
+    }
+
+    func toggleTripEdit() {
+        withAnimation(.spring(response: 0.34, dampingFraction: 0.84)) {
+            tripEdit.toggle()
+        }
+        Haptics.tap()
+        toast(
+            tripEdit ? "Edit stops · drag pins or grab a stop" : "Edit done · times kept",
+            icon: tripEdit ? "hand.draw.fill" : "checkmark.circle.fill"
+        )
+    }
+
+    func moveTripStop(_ id: UUID, toX x: CGFloat, toY y: CGFloat) {
+        var list = currentStops
+        guard let index = list.firstIndex(where: { $0.id == id }) else { return }
+        list[index].x = min(max(x, 0.06), 0.94)
+        list[index].y = min(max(y, 0.10), 0.90)
+        setCurrentStops(list)
+    }
+
+    func didFinishTripStopMove() {
+        markTripEdited()
+        Haptics.success()
+        toast("Stop moved · route recalculated", icon: "map.fill")
+    }
+
+    func moveTripStops(from source: IndexSet, to destination: Int) {
+        var list = currentStops
+        let slots = list.map(\.time)
+        list.move(fromOffsets: source, toOffset: destination)
+        Self.applyTimeSlots(&list, slots: slots)
+        setCurrentStops(list)
+        markTripEdited()
+        Haptics.success()
+        toast("Order updated · route recalculated", icon: "arrow.up.arrow.down")
+    }
+
+    func shiftTripStop(_ id: UUID, up: Bool) {
+        var list = currentStops
+        guard let index = list.firstIndex(where: { $0.id == id }) else { return }
+        let target = up ? index - 1 : index + 1
+        guard list.indices.contains(target) else { return }
+        let slots = list.map(\.time)
+        list.swapAt(index, target)
+        Self.applyTimeSlots(&list, slots: slots)
+        setCurrentStops(list)
+        markTripEdited()
+        Haptics.tap()
+        toast("Order updated · route recalculated", icon: "arrow.up.arrow.down")
+    }
+
+    func moveTripStopToIndex(_ id: UUID, to target: Int) {
+        var list = currentStops
+        guard let source = list.firstIndex(where: { $0.id == id }), source != target else { return }
+        let slots = list.map(\.time)
+        let stop = list.remove(at: source)
+        list.insert(stop, at: min(max(target, 0), list.count))
+        Self.applyTimeSlots(&list, slots: slots)
+        setCurrentStops(list)
+        markTripEdited()
+        Haptics.success()
+        toast("Order updated · route recalculated", icon: "arrow.up.arrow.down")
+    }
+
+    func deleteTripStop(_ id: UUID) {
+        var list = currentStops
+        guard list.count > 2, let index = list.firstIndex(where: { $0.id == id }) else { return }
+        let name = list[index].name
+        let slots = list.map(\.time)
+        list.remove(at: index)
+        Self.applyTimeSlots(&list, slots: slots)
+        setCurrentStops(list)
+        markTripEdited()
+        Haptics.tap()
+        toast("Removed \(name)", icon: "trash")
+    }
+
+    var availableTripSuggestions: [TripSuggestion] {
+        let names = Set(currentStops.map(\.name))
+        return tripSuggestions.filter { !names.contains($0.name) }
+    }
+
+    func addTripStop(_ suggestion: TripSuggestion) {
+        var list = currentStops
+        let time = Self.plusMinutes(list.last?.time ?? "09:00", 60)
+        let duration = suggestion.meta.components(separatedBy: " · ").last ?? "45 min"
+        list.append(
+            RouteStop(
+                name: suggestion.name,
+                time: time,
+                duration: duration,
+                x: suggestion.x,
+                y: suggestion.y,
+                tag: "Pico pick",
+                tagStyle: .accent
+            )
+        )
+        setCurrentStops(list)
+        markTripEdited()
+        Haptics.success()
+        toast("\(suggestion.name) added · route updated", icon: "mappin.and.ellipse")
+    }
+
+    func saveTripPlan() {
+        tripSaved = true
+        tripDirty = false
+        Haptics.success()
+        toast("Plan saved · start when you are ready", icon: "checkmark.seal.fill")
+    }
+
+    func startTrip() {
+        tripSaved = true
+        tripDirty = false
+        tripEdit = false
+        liveStop = 0
+        Haptics.success()
+        withAnimation(.spring(response: 0.42, dampingFraction: 0.86)) {
+            tripLive = true
+        }
+        toast("Trip started · first stop ahead", icon: "figure.walk")
+    }
+
+    func advanceLiveStop() {
+        guard tripLive else { return }
+        let count = currentStops.count
+        Haptics.tap()
+        withAnimation(.spring(response: 0.34, dampingFraction: 0.86)) {
+            liveStop = min(liveStop + 1, count)
+        }
+        if liveStop >= count {
+            Haptics.success()
+            toast("Day complete · every stop covered", icon: "checkmark.seal.fill")
+        } else {
+            let next = currentStops[liveStop]
+            toast("Next · \(next.name)", icon: "arrow.right")
+        }
+    }
+
+    func endLiveTrip() {
+        withAnimation(.easeOut(duration: 0.2)) {
+            tripLive = false
+            liveStop = 0
+        }
+        Haptics.tap()
+        toast("Live trip ended · plan saved", icon: "xmark.circle")
+    }
+
+    func finishLiveDay() {
+        if tripDay < tripDayCount - 1 {
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.86)) {
+                tripDay += 1
+                tripLive = false
+                liveStop = 0
+                selectedStopID = nil
+            }
+            Haptics.success()
+            toast("Day done · Day \(tripDay + 1) loaded", icon: "calendar")
+        } else {
+            withAnimation(.easeOut(duration: 0.2)) {
+                tripLive = false
+                liveStop = 0
+            }
+            Haptics.success()
+            toast("Trip complete · plan saved", icon: "checkmark.seal.fill")
+            tripSaved = true
+            tripDirty = false
+            recapSlide = 0
+            Task { @MainActor [weak self] in
+                try? await Task.sleep(for: .milliseconds(420))
+                self?.recapOpen = true
+            }
+        }
+    }
+
+    func liveCoordinate(_ stop: RouteStop) -> String {
+        String(format: "%.4f° N, %.4f° E", 39.92 - Double(stop.y) * 0.06, 116.38 + Double(stop.x) * 0.06)
+    }
+
+    func liveClock(_ stop: RouteStop) -> String {
+        Self.plusMinutes(stop.time, 12)
+    }
+
+    var reorderStops: [RouteStop] {
+        tab == .trip && planBuilt ? currentStops : stops
+    }
+
+    func moveReorderStops(from source: IndexSet, to destination: Int) {
+        if tab == .trip && planBuilt {
+            moveTripStops(from: source, to: destination)
+        } else {
+            moveStops(from: source, to: destination)
+        }
+    }
+
+    static func plusMinutes(_ hhmm: String, _ minutes: Int) -> String {
+        let parts = hhmm.split(separator: ":")
+        guard parts.count == 2, let hour = Int(parts[0]), let minute = Int(parts[1]) else { return hhmm }
+        let total = (hour * 60 + minute + minutes + 24 * 60) % (24 * 60)
+        return String(format: "%02d:%02d", total / 60, total % 60)
+    }
+
+    private static func applyTimeSlots(_ list: inout [RouteStop], slots: [String]) {
+        for index in list.indices where index < slots.count {
+            list[index].time = slots[index]
+        }
+    }
+
+    private static let dayCoordinates: [[CGPoint]] = [
+        [CGPoint(x: 0.30, y: 0.82), CGPoint(x: 0.42, y: 0.64), CGPoint(x: 0.54, y: 0.48),
+         CGPoint(x: 0.44, y: 0.32), CGPoint(x: 0.60, y: 0.24), CGPoint(x: 0.70, y: 0.40)],
+        [CGPoint(x: 0.34, y: 0.86), CGPoint(x: 0.46, y: 0.70), CGPoint(x: 0.56, y: 0.54),
+         CGPoint(x: 0.50, y: 0.36), CGPoint(x: 0.64, y: 0.28), CGPoint(x: 0.72, y: 0.48)],
+        [CGPoint(x: 0.28, y: 0.78), CGPoint(x: 0.40, y: 0.62), CGPoint(x: 0.52, y: 0.44),
+         CGPoint(x: 0.62, y: 0.30), CGPoint(x: 0.70, y: 0.50), CGPoint(x: 0.58, y: 0.68)],
+        [CGPoint(x: 0.36, y: 0.84), CGPoint(x: 0.48, y: 0.66), CGPoint(x: 0.58, y: 0.50),
+         CGPoint(x: 0.48, y: 0.34), CGPoint(x: 0.34, y: 0.44), CGPoint(x: 0.26, y: 0.62)],
+        [CGPoint(x: 0.32, y: 0.80), CGPoint(x: 0.44, y: 0.62), CGPoint(x: 0.54, y: 0.46),
+         CGPoint(x: 0.66, y: 0.32), CGPoint(x: 0.74, y: 0.50), CGPoint(x: 0.62, y: 0.70)]
+    ]
+
+    private func makeTripDays(stops: [RouteStop], count: Int) -> [TripDay] {
+        typealias Seed = (
+            title: String, meta: String, tag: String,
+            style: TagStyle, note: String, stops: [(String, String, String)]
+        )
+        let seeds: [Seed] = [
+            ("Central Axis · Palace & hutongs", "6 stops · 4.2 km · ~5 hr", "Today", .accent,
+             "Palace booked for 09:00 · in at Meridian Gate, out at Shenwu Gate", []),
+            ("Great Wall day · Badaling", "3 stops · private car · full day", "Car booked", .blue,
+             "Bring your passport · windy up there, pack an extra layer",
+             [("Hotel pickup", "07:30", "30 min"), ("Badaling Great Wall", "09:00", "3 hr"), ("Olympic Forest Park", "16:30", "1.5 hr")]),
+            ("Imperial gardens · Palace & museum", "4 stops · Metro Line 4 · ~8 hr", "Tickets to book", .soft,
+             "The National Museum needs a real-name booking; bring your passport",
+             [("Summer Palace", "09:00", "2 hr"), ("Lunch in Wudaokou", "12:30", "1.5 hr"), ("National Museum of China", "14:00", "2 hr"), ("Qianmen Street", "18:00", "1.5 hr")]),
+            ("Slow hutongs · departure", "4 stops · 3.1 km walk · ~4 hr", "Departure", .ok,
+             "Flight 18:40 · be at the airport 2.5 hr early",
+             [("Nanluoguxiang", "09:30", "45 min"), ("Drum & Bell Towers", "11:00", "45 min"), ("Daoxiangcun run", "13:00", "45 min"), ("Beijing Capital Airport", "16:00", "Flight")]),
+            ("Temple of Heaven & Beihai", "4 stops · 5.1 km · ~6 hr", "Pico pick", .accent,
+             "Enter the Temple of Heaven from the south gate · rent a boat if the weather holds",
+             [("Temple of Heaven", "09:00", "1.5 hr"), ("Lunch in Qianmen", "12:30", "1.5 hr"), ("Beihai Park", "15:00", "1.5 hr"), ("Shichahai at dusk", "18:00", "1.5 hr")]),
+            ("Museum morning · departure", "3 stops · 2.4 km · ~5 hr", "Departure", .ok,
+             "Real-name booking needed for the museum · flight at 18:40",
+             [("National Museum of China", "09:30", "2 hr"), ("Lunch in Qianmen", "12:30", "1.5 hr"), ("Beijing Capital Airport", "16:00", "Flight")])
+        ]
+
+        let total = min(max(count, 1), seeds.count)
+        var days: [TripDay] = []
+        for index in 0..<total {
+            let seed = seeds[index]
+            var dayStops: [RouteStop]
+            if index == 0 {
+                dayStops = stops
+            } else {
+                let coords = Self.dayCoordinates[(index - 1) % Self.dayCoordinates.count]
+                dayStops = seed.stops.enumerated().map { position, item in
+                    let point = coords[position % coords.count]
+                    return RouteStop(
+                        name: item.0,
+                        time: item.1,
+                        duration: item.2,
+                        x: point.x,
+                        y: point.y,
+                        tag: position == 0 ? "Start" : "",
+                        tagStyle: .soft
+                    )
+                }
+            }
+            let stamp = tripStamp(index)
+            days.append(
+                TripDay(
+                    date: stamp.date,
+                    week: stamp.week,
+                    day: index + 1,
+                    title: seed.title,
+                    meta: seed.meta,
+                    tag: seed.tag,
+                    tagStyle: seed.style,
+                    stops: dayStops,
+                    note: seed.note
+                )
+            )
+        }
+        return days
     }
 
     // MARK: Forum
@@ -399,12 +1009,61 @@ final class AppModel: ObservableObject {
         }
     }
 
+    func toggleSavedPost(_ post: ForumPost) {
+        if savedPostIDs.contains(post.id) {
+            savedPostIDs.remove(post.id)
+        } else {
+            savedPostIDs.insert(post.id)
+            Haptics.tap()
+        }
+        toast(savedPostIDs.contains(post.id) ? "Saved · find it in Me" : "Removed from saved", icon: "bookmark.fill")
+    }
+
+    // MARK: Attractions
+
+    var bookedAttractionCount: Int { attractions.filter(\.booked).count }
+
+    var attractionProgress: Double {
+        attractions.isEmpty ? 0 : Double(bookedAttractionCount) / Double(attractions.count)
+    }
+
+    var pendingAttractions: [AttractionBooking] {
+        attractions.filter { !$0.booked }
+    }
+
+    func bookAttraction(_ attraction: AttractionBooking) {
+        guard let index = attractions.firstIndex(where: { $0.id == attraction.id }), !attractions[index].booked else { return }
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.86)) {
+            attractions[index].booked = true
+            attractions[index].code = Self.makeBookingCode()
+        }
+        Haptics.success()
+        toast("Booked \(attraction.title) · scan your ID at the gate", icon: "ticket.fill")
+    }
+
+    func bookAllAttractions() {
+        guard !pendingAttractions.isEmpty else { return }
+        let count = pendingAttractions.count
+        withAnimation(.spring(response: 0.45, dampingFraction: 0.86)) {
+            for index in attractions.indices where !attractions[index].booked {
+                attractions[index].booked = true
+                attractions[index].code = Self.makeBookingCode()
+            }
+        }
+        Haptics.success()
+        toast("Booked \(count) sights · passes ready", icon: "checkmark.seal.fill")
+    }
+
+    private static func makeBookingCode() -> String {
+        "ROAMCHINA-" + String((0..<4).map { _ in "ABCDEFGHJKLMNPQRSTUVWXYZ23456789".randomElement()! })
+    }
+
     func joinEvent() {
         withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
             joinedEvent.toggle()
         }
         Haptics.success()
-        toast(joinedEvent ? "已报名 · 已同步 10/18 行程" : "已取消报名", icon: joinedEvent ? "checkmark.circle.fill" : "xmark.circle")
+        toast(joinedEvent ? "Joined · added to your 10/18 plan" : "Left event", icon: joinedEvent ? "checkmark.circle.fill" : "xmark.circle")
     }
 
     func toggleJoin(_ event: LocalEvent) {
@@ -415,7 +1074,7 @@ final class AppModel: ObservableObject {
             Haptics.success()
         }
         toast(
-            joinedEventIDs.contains(event.id) ? "已报名 · \(event.title)" : "已取消报名",
+            joinedEventIDs.contains(event.id) ? "Joined · \(event.title)" : "Left event",
             icon: joinedEventIDs.contains(event.id) ? "checkmark.circle.fill" : "xmark.circle"
         )
     }
@@ -423,21 +1082,43 @@ final class AppModel: ObservableObject {
     func publishEvent(title: String, date: String, time: String, place: String, fee: String, note: String) {
         let event = LocalEvent(
             title: title,
-            subtitle: note.isEmpty ? "社区成员发起 · 欢迎来玩" : note,
+            subtitle: note.isEmpty ? "Hosted by a community member · all welcome" : note,
             date: date,
             time: time,
             place: place,
-            host: "@王博",
-            fee: fee.isEmpty ? "免费" : fee,
+            host: "@Wang Bo",
+            fee: fee.isEmpty ? "Free" : fee,
             attendees: 1,
             isMine: true,
             tint: 1
         )
         withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
             localEvents.insert(event, at: 0)
+            forumPosts.insert(
+                ForumPost(
+                    author: "Wang Bo",
+                    avatar: "W",
+                    tint: 5,
+                    time: "Just now",
+                    kind: .event,
+                    title: title,
+                    body: note.isEmpty ? "Started by you · all welcome" : note,
+                    tags: [date, fee.isEmpty ? "Free" : fee],
+                    likes: "0",
+                    saves: "0",
+                    symbol: "sun.horizon.fill",
+                    artTint: 3,
+                    height: 150,
+                    eventTitle: title,
+                    comments: 0,
+                    comment: "Started by you · all welcome",
+                    isMine: true
+                ),
+                at: 0
+            )
         }
         Haptics.success()
-        toast("活动已发布 · 已进入社区审核", icon: "calendar.badge.plus")
+        toast("Event published · in community review", icon: "calendar.badge.plus")
     }
 
     // MARK: Assistant
@@ -451,58 +1132,43 @@ final class AppModel: ObservableObject {
     }
 
     var quickPrompts: [String] {
-        if assistantContext.contains("门票") || assistantContext.contains("故宫") {
-            return ["故宫怎么预约", "还有余票吗", "附近怎么走"]
+        if assistantContext.contains("Ticket") || assistantContext.contains("Forbidden City") {
+            return ["How do I book the Forbidden City?", "Any tickets left?", "How do I get there?"]
         }
-        if assistantContext.contains("翻译") {
-            return ["就医怎么说", "帮我放大", "打车怎么说"]
+        if assistantContext.contains("Translate") {
+            return ["How do I say 'doctor'?", "Make the text bigger", "How do I ask for a taxi?"]
         }
-        if assistantContext.contains("清单") {
-            return ["还差什么", "VPN 怎么弄", "eSIM 选哪个"]
+        if assistantContext.contains("Checklist") {
+            return ["What's still missing?", "How do I set up a VPN?", "Which eSIM should I get?"]
         }
         switch tab {
-        case .trip: return ["故宫门票怎么约", "住哪个区域方便", "10 月穿什么"]
-        case .plan: return ["帮我重排路线", "附近有咖啡吗", "生成可视化笔记"]
-        case .forum: return ["哪家烤鸭不排队", "带什么伴手礼", "有本地活动吗"]
-        case .translate: return ["就医怎么说", "帮我叫车", "放大给店员看"]
-        case .me: return ["离线包怎么用", "怎么开 VPN", "导出我的行程"]
+        case .trip: return ["How do I book the Forbidden City?", "Which area should I stay in?", "What should I wear in October?"]
+        case .plan: return ["Rework my route", "Any coffee nearby?", "Make a visual note"]
+        case .forum: return ["Which duck place has no queue?", "What gifts should I bring?", "Any local events?"]
+        case .translate: return ["How do I say 'doctor'?", "Call me a taxi", "Show staff a bigger text"]
+        case .me: return ["How do offline packs work?", "How do I set up a VPN?", "Export my trip"]
         }
     }
 
     func seedAssistant() {
-        let context = assistantContext
-        var card: AssistantCardKind? = nil
-        let text: String
-
-        if context.contains("门票") || context.contains("故宫") {
-            text = "故宫 10/15 上午还有 812 张余票，成人 ¥60，实名预约、刷身份证入场。要我直接锁定 09:00 的 2 个名额吗？"
-            card = .ticket
-        } else if context.contains("翻译") {
-            text = "就医场景我准备了 4 句，最常用的是「我食物过敏，需要去医院」。你可以放大给店员看，或者让我读出来。"
-            card = .translate
-        } else if context.contains("清单") {
-            text = "我对照天气、闭馆日和余票重新排了一遍：先办 eSIM 和 VPN，再约故宫与长城。新增的 3 项已经放进清单。"
-            card = .checklist
-        } else {
-            switch tab {
-            case .trip:
-                text = "早上好，王博。我看过你 10/15–18 的行程：白天 22℃、早晚 11℃，故宫周一闭馆，建议把故宫放在 15 号上午。要先锁门票，还是先重排路线？"
-                card = .route
-            case .plan:
-                text = "这版中轴线目前 5.2 km，什刹海排在故宫后面会折返一次。把什刹海挪到 13:00、景山挪到 14:30，能少走 1.2 km。要直接应用吗？"
-                card = .route
-            case .forum:
-                text = "社区里「北京中轴线 · 半日」和你现在的路线重合 4 站，可以直接套用成副本。需要我再对比一下两家烤鸭店吗？"
-                card = .route
-            case .translate:
-                text = "离线语句库已经下载好，86 句覆盖找路、就餐、就医和打车。需要我把就医的 4 句放大，还是先听一遍发音？"
-                card = .translate
-            case .me:
-                text = "你的北京离线包已下载。出发前建议再确认 VPN 和 eSIM——这两项最容易在落地后卡住，需要我一步步带你设置吗？"
-                card = .checklist
-            }
+        if showPlanBuilder {
+            chatMessages = [ChatMessage(role: .assistant, text: "Hi, I'm Pico. Tell me what kind of trip you like and I'll build your first Beijing plan — route order, timing and all.")]
+            return
         }
-        chatMessages = [ChatMessage(role: .assistant, text: text, card: card)]
+        let text: String
+        switch tab {
+        case .trip:
+            text = "Ask me anything about today's route — timing, tickets, food nearby, or a stop you want to swap."
+        case .plan:
+            text = "I can compare this route with another, trim the walking, or suggest a coffee stop. What would you like to change?"
+        case .forum:
+            text = "Ask me whether a community route fits your trip, or where to eat near any stop."
+        case .translate:
+            text = "Ask me to translate a phrase for a shop, a taxi, or a doctor. I'll keep it short enough to show on screen."
+        case .me:
+            text = "Ask me what to prepare before you fly — tickets, eSIM, VPN, or what to pack."
+        }
+        chatMessages = [ChatMessage(role: .assistant, text: text)]
     }
 
     func resetChat() {
@@ -510,49 +1176,148 @@ final class AppModel: ObservableObject {
         seedAssistant()
     }
 
-    func sendChat(_ raw: String) {
-        let text = raw.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !text.isEmpty else { return }
-        chatMessages.append(ChatMessage(role: .user, text: text))
-        chatDraft = ""
+    func buildPlan() {
+        guard let persona = quizPersona else {
+            Haptics.tap()
+            return
+        }
+        onboarding = false
+        planBuilt = true
+        assistantContext = "Plan · \(persona.fit) · \(planLength) days"
+        routeName = "\(persona.fit) · New plan"
+        tripDays = makeTripDays(stops: stops, count: planLength)
+        tripDay = 0
+        tripEdit = false
+        tripSaved = false
+        tripDirty = false
+        tripLive = false
+        liveStop = 0
+        let note = quizNote.trimmingCharacters(in: .whitespacesAndNewlines)
+        let answers = "\(quizDays ?? "") · \(quizStyle ?? "") · \(quizTheme ?? "")"
+        chatMessages.append(ChatMessage(role: .user, text: note.isEmpty ? answers : "\(answers) · \(note)"))
         chatThinking = true
+        Haptics.tap()
         Task { [weak self] in
-            try? await Task.sleep(nanoseconds: 700_000_000)
+            try? await Task.sleep(nanoseconds: 1_250_000_000)
             guard let self else { return }
             self.chatThinking = false
             withAnimation(.spring(response: 0.4, dampingFraction: 0.86)) {
-                self.chatMessages.append(self.reply(to: text))
+                self.chatMessages.append(ChatMessage(role: .assistant, text: self.planNarrative(persona), card: .plan))
             }
-            Haptics.tap()
+            Haptics.success()
+            self.firstRunFlow = false
+            if self.assistantOpen {
+                self.tab = .trip
+                self.assistantOpen = false
+                try? await Task.sleep(for: .milliseconds(360))
+            }
+            self.toast("Plan ready · \(self.planLength) days on your trip", icon: "sparkles")
         }
     }
 
-    private func reply(to text: String) -> ChatMessage {
-        if text.contains("票") || text.contains("预约") || text.contains("故宫") {
-            return ChatMessage(role: .assistant, text: "故宫 10/15 上午还有 812 张余票，成人 ¥60。实名预约后刷身份证入场，我把 09:00 两个成人的时段记在清单里，先锁定吗？", card: .ticket)
+    /// Rebuilt from the current quiz every time it is shown, so switching
+    /// language also switches an already-delivered plan message.
+    var planNarrativeText: String {
+        guard let persona = quizPersona else { return "" }
+        return planNarrative(persona)
+    }
+
+    private func planNarrative(_ persona: TravelPersona) -> String {
+        let note = persona.note.trimmingCharacters(in: .whitespacesAndNewlines)
+        if lang == .zh {
+            let detail: String
+            switch quizStyle {
+            case "Food first":
+                detail = "午饭是 11:30 排队前的烤鸭，景点之间还留了咖啡空档。"
+            case "Outdoors":
+                detail = "上午都在户外——日出时的景山、长城山脊、北海划船。"
+            case "Night owl":
+                detail = "17:00 前看完景点，之后鼓楼和后海接着带你过夜。"
+            case "Family friendly":
+                detail = "每天只排两个重点，中间留足休息和找洗手间的时间，地铁优先、少走回头路。"
+            case "Budget smart":
+                detail = "门票按免费或低价优先，午饭挑本地小馆，交通全用地铁和步行。"
+            default:
+                detail = "两段长长的博物馆时间和一个茶馆下午，每天走路不超过 4 公里。"
+            }
+            let who = L10n.text(persona.title, lang)
+            let noteLine = note.isEmpty ? "" : "你写的「\(note)」我也记下了，排路线时会先顾这个。"
+            return "搞定。我给\(who)排了 \(planLength) 天的路线，第一天留给故宫。\(detail)\(noteLine)想改什么直接说。"
         }
-        if text.contains("酒店") || text.contains("住") || text.contains("民宿") {
-            return ChatMessage(role: .assistant, text: "按你的景点分布，王府井最均衡：到故宫步行 12 分钟，去南锣鼓巷地铁 2 站。我按预算筛了三个区域，可以参考：", card: .hotels)
+        let detail: String
+        switch quizStyle {
+        case "Food first":
+            detail = "Lunch is a duck stop before the 11:30 queue, with coffee gaps between sights."
+        case "Outdoors":
+            detail = "Mornings stay outside — Jingshan at sunrise, the Great Wall ridge walk, boats at Beihai."
+        case "Night owl":
+            detail = "Sights finish by 17:00, then the Drum Tower and Houhai carry you into the evening."
+        case "Family friendly":
+            detail = "Two highlights a day, with rest and bathroom breaks between them, and metro over long walks."
+        case "Budget smart":
+            detail = "Free and low-cost sights first, lunch at local noodle shops, metro and walking only."
+        default:
+            detail = "Two long museum stops and a teahouse afternoon, never more than 4 km of walking a day."
         }
-        if text.contains("天气") || text.contains("穿") || text.contains("冷") || text.contains("热") {
-            return ChatMessage(role: .assistant, text: "10/15–17 北京白天 22℃、早晚 11℃，建议薄外套 + 长裤，故宫石板路多带一双软底鞋。18 号可能有小雨，我会在前一晚提醒你。")
+        let noteLine = note.isEmpty ? "" : " I kept your note in mind: “\(note)”."
+        return "Done. I built a \(planLength)-day route for \(persona.title), keeping the palace on day one. \(detail)\(noteLine) Adjust anything by just asking."
+    }
+
+    /// Handles one-off chat lines such as the quiz answer recap and the
+    /// "Looking at" context, which are composed from English data at runtime.
+    func chatDisplay(_ text: String) -> String {
+        guard lang == .zh else { return text }
+        let exact = L10n.text(text, lang)
+        if exact != text { return exact }
+        guard text.contains(" · ") else { return text }
+        return text.components(separatedBy: " · ").map { part in
+            if part.hasSuffix(" days"), let count = Int(part.dropLast(5)) {
+                return "\(count) 天"
+            }
+            return L10n.text(part, lang)
+        }.joined(separator: " · ")
+    }
+
+    func sendChat(_ raw: String) {
+        let text = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty, !chatThinking else { return }
+        chatMessages.append(ChatMessage(role: .user, text: text))
+        chatDraft = ""
+        chatThinking = true
+        let history = chatMessages
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                let reply = try await PicoService.reply(history: history, context: self.picoContext)
+                self.chatThinking = false
+                withAnimation(.spring(response: 0.4, dampingFraction: 0.86)) {
+                    self.chatMessages.append(ChatMessage(role: .assistant, text: reply))
+                }
+                Haptics.tap()
+            } catch {
+                self.chatThinking = false
+                let fallback = "Pico couldn't reach the live model just now. Try once more in a moment."
+                let key = error.localizedDescription.isEmpty ? fallback : error.localizedDescription
+                withAnimation(.spring(response: 0.4, dampingFraction: 0.86)) {
+                    self.chatMessages.append(ChatMessage(role: .assistant, text: L10n.text(key, self.lang)))
+                }
+            }
         }
-        if text.contains("路线") || text.contains("重排") || text.contains("怎么走") || text.contains("绕") {
-            return ChatMessage(role: .assistant, text: "我按「少折返」重排了：天安门 → 故宫 → 什刹海 → 景山 → 南锣鼓巷 → 钟鼓楼。能少走 1.2 km，日落刚好在钟鼓楼。", card: .route)
-        }
-        if text.contains("清单") || text.contains("准备") || text.contains("VPN") || text.contains("eSIM") || text.contains("电话") {
-            return ChatMessage(role: .assistant, text: "行前清单里还差 6 项。我挑出最容易卡住的三项：eSIM 套餐、VPN 安装、故宫门票。要一并加进清单吗？", card: .checklist)
-        }
-        if text.contains("翻译") || text.contains("怎么说") || text.contains("说") || text.contains("英语") {
-            return ChatMessage(role: .assistant, text: "我把这句整理成了可以直接给店员看的中英对照，也能播放中文语音。", card: .translate)
-        }
-        if text.contains("吃") || text.contains("餐") || text.contains("烤鸭") || text.contains("咖啡") {
-            return ChatMessage(role: .assistant, text: "四季民福故宫店 11:00 前到基本不排队；想快一点可以去胖妹面庄，人均 ¥45。两家都在你 15 号的路线附近。")
-        }
-        if text.contains("医院") || text.contains("过敏") || text.contains("紧急") || text.contains("就医") {
-            return ChatMessage(role: .assistant, text: "别担心。离线就医语句里有 4 句可以直接放大给医生看，急救电话是 120。需要我把最近的医院也标在地图上吗？")
-        }
-        return ChatMessage(role: .assistant, text: "我可以帮你查余票、排路线、加清单、翻语句，或者解释附近的吃喝。你想先处理哪一件？")
+    }
+
+    var picoContext: PicoService.Context {
+        let day = (tab == .trip && planBuilt) ? currentTripDay.map { "\($0.title) · \($0.date)" } : nil
+        return PicoService.Context(
+            tab: assistantContext,
+            day: day,
+            planBuilt: planBuilt,
+            days: planBuilt ? tripDayCount : nil,
+            style: quizStyle,
+            theme: quizTheme,
+            note: quizNote.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : String(quizNote.prefix(140)),
+            stage: tripLive ? "Journey in progress" : (planBuilt ? "Plan saved" : "Planning the first trip"),
+            language: lang == .zh ? "zh" : "en"
+        )
     }
 
     // MARK: Translate
@@ -627,62 +1392,155 @@ final class AppModel: ObservableObject {
     // MARK: Seed data
     private static func makeChecklist() -> [ChecklistItem] {
         [
-            ChecklistItem(title: "护照有效期 ≥ 6 个月", meta: "已确认 · 2027/03 到期", category: .docs, phase: .before, status: .done, trailing: "已核验"),
-            ChecklistItem(title: "往返机票 & 酒店", meta: "已出票 · 王府井 3 晚", category: .docs, phase: .before, status: .done, trailing: "查看"),
-            ChecklistItem(title: "旅行保险 · 生效中", meta: "安联 · 保额 ¥80 万", category: .docs, phase: .before, status: .done, trailing: "已生效"),
-            ChecklistItem(title: "故宫门票 · 10/15 09:00", meta: "成人 ×2 · ¥120 · 余票 812", category: .tickets, phase: .before, status: .action, actionLabel: "去预约", tag: "余票紧张", tagStyle: .warn),
-            ChecklistItem(title: "长城 · 10/16 08:30", meta: "八达岭 · 需预约缆车", category: .tickets, phase: .before, status: .action, actionLabel: "预约", tag: "待预约", tagStyle: .neutral),
-            ChecklistItem(title: "颐和园 · 10/17 09:00", meta: "联票 ¥60 / 人", category: .tickets, phase: .before, status: .todo, actionLabel: "购票"),
-            ChecklistItem(title: "国家博物馆 · 10/17 14:00", meta: "免费 · 需实名预约", category: .tickets, phase: .before, status: .todo, actionLabel: "预约"),
-            ChecklistItem(title: "eSIM / 中国手机号", meta: "3 家方案对比 · 从 ¥29 起", category: .connectivity, phase: .arrival, status: .action, actionLabel: "选套餐"),
-            ChecklistItem(title: "VPN", meta: "境内应用商店无法下载", category: .connectivity, phase: .arrival, status: .action, actionLabel: "教程", tag: "提前装", tagStyle: .warn),
-            ChecklistItem(title: "离线地图与翻译包", meta: "北京 · 86 句应急表达", category: .connectivity, phase: .arrival, status: .done, trailing: "已下载"),
-            ChecklistItem(title: "支付宝 / 微信支付", meta: "已绑定 VISA · 单笔 ≤ ¥5,000", category: .transit, phase: .arrival, status: .done, trailing: "已完成"),
-            ChecklistItem(title: "交通卡 / 地铁乘车码", meta: "Apple 钱包 · 已开通", category: .transit, phase: .arrival, status: .done, trailing: "已开通")
+            ChecklistItem(title: "Passport valid 6+ months", meta: "Confirmed · expires 03/2027", category: .docs, phase: .before, status: .done, trailing: "Verified"),
+            ChecklistItem(title: "Flights & hotel booked", meta: "Ticketed · Wangfujing, 3 nights", category: .docs, phase: .before, status: .done, trailing: "View"),
+            ChecklistItem(title: "Travel insurance · active", meta: "Allianz · ¥800k cover", category: .docs, phase: .before, status: .done, trailing: "Active"),
+            ChecklistItem(title: "Forbidden City tickets · 10/15 09:00", meta: "2 adults · ¥120 · 812 left", category: .tickets, phase: .before, status: .action, actionLabel: "Book", tag: "Selling fast", tagStyle: .warn),
+            ChecklistItem(title: "Great Wall · 10/16 08:30", meta: "Badaling · cable car needs booking", category: .tickets, phase: .before, status: .action, actionLabel: "Book", tag: "To book", tagStyle: .neutral),
+            ChecklistItem(title: "Summer Palace · 10/17 09:00", meta: "Combined ticket ¥60 / person", category: .tickets, phase: .before, status: .todo, actionLabel: "Buy"),
+            ChecklistItem(title: "National Museum · 10/17 14:00", meta: "Free · real-name booking", category: .tickets, phase: .before, status: .todo, actionLabel: "Book"),
+            ChecklistItem(title: "eSIM / China number", meta: "3 plans compared · from ¥29", category: .connectivity, phase: .arrival, status: .action, actionLabel: "Choose plan"),
+            ChecklistItem(title: "VPN", meta: "Not on China's App Store", category: .connectivity, phase: .arrival, status: .action, actionLabel: "Guide", tag: "Install early", tagStyle: .warn),
+            ChecklistItem(title: "Offline maps & phrases", meta: "Beijing · 86 emergency phrases", category: .connectivity, phase: .arrival, status: .done, trailing: "Downloaded"),
+            ChecklistItem(title: "Alipay / WeChat Pay", meta: "VISA linked · ¥5,000 per payment", category: .transit, phase: .arrival, status: .done, trailing: "Done"),
+            ChecklistItem(title: "Transit card / metro QR", meta: "Apple Wallet · active", category: .transit, phase: .arrival, status: .done, trailing: "Active")
         ]
     }
 
     private static func makeStops() -> [RouteStop] {
         [
-            RouteStop(name: "天安门广场", time: "09:00", duration: "30 分钟", x: 0.49, y: 0.86, tag: "拍照"),
-            RouteStop(name: "故宫博物院", time: "09:40", duration: "3 小时", x: 0.52, y: 0.67, tag: "已订", tagStyle: .ok),
-            RouteStop(name: "景山公园", time: "13:00", duration: "1 小时", x: 0.57, y: 0.56, tag: "登高"),
-            RouteStop(name: "什刹海", time: "15:00", duration: "1.5 小时", x: 0.37, y: 0.38, tag: "AI 建议", tagStyle: .accent),
-            RouteStop(name: "南锣鼓巷", time: "16:30", duration: "45 分钟", x: 0.61, y: 0.31, tag: "咖啡"),
-            RouteStop(name: "钟鼓楼", time: "17:30", duration: "45 分钟", x: 0.50, y: 0.20, tag: "日落")
+            RouteStop(name: "Tiananmen Square", time: "09:00", duration: "30 min", x: 0.49, y: 0.86, tag: "Photo"),
+            RouteStop(name: "Forbidden City", time: "09:40", duration: "3 hr", x: 0.52, y: 0.67, tag: "Booked", tagStyle: .ok),
+            RouteStop(name: "Jingshan Park", time: "13:00", duration: "1 hr", x: 0.57, y: 0.56, tag: "Views"),
+            RouteStop(name: "Shichahai", time: "15:00", duration: "1.5 hr", x: 0.37, y: 0.38, tag: "Pico pick", tagStyle: .accent),
+            RouteStop(name: "Nanluoguxiang", time: "16:30", duration: "45 min", x: 0.61, y: 0.31, tag: "Coffee"),
+            RouteStop(name: "Drum & Bell Towers", time: "17:30", duration: "45 min", x: 0.50, y: 0.20, tag: "Sunset")
+        ]
+    }
+
+    private static func makeForumPosts() -> [ForumPost] {
+        [
+            ForumPost(author: "Xiaoman", avatar: "X", tint: 5, time: "2 hr ago", kind: .spot,
+                      title: "Sunset at Jingshan's Wanchun Pavilion beats the photos",
+                      body: "Get up there by 17:00 and the palace roofs turn gold. The east railing is the shot — claim it early.",
+                      tags: ["Jingshan", "Sunset", "Viewpoint"], likes: "3.4k", saves: "862",
+                      symbol: "sun.horizon.fill", artTint: 3, height: 174, photo: "post-n1", credit: "EditQ / CC BY-SA 4.0",
+                      placeTitle: "Sunset at Jingshan", comment: "@Zhe: Went on Wednesday — the sun hit the ridge at 17:10."),
+            ForumPost(author: "Ken", avatar: "K", tint: 4, time: "4 hr ago", kind: .route,
+                      title: "The Central Axis in a day: Yongdingmen to the Drum Tower",
+                      body: "6 stops, 4.2 km. Start at 3pm and you land at Jingshan for sunset. The metro is a backup the whole way.",
+                      tags: ["Central Axis", "Walk", "Route"], likes: "2.1k", saves: "1.2k",
+                      symbol: "point.topleft.down.to.point.bottomright.curvepath", artTint: 4, height: 120, photo: "post-n2", credit: "xiquinhosilva / CC BY 4.0",
+                      routeIndex: 1, comment: "@Lina: Finished it — feet survived, two coffee stops helped."),
+            ForumPost(author: "Zhe", avatar: "Z", tint: 3, time: "5 hr ago", kind: .restaurant,
+                      title: "Siji Minfu before 11 — no queue, really",
+                      body: "Dip the duck skin in sugar first; half a bird feeds two. After 3pm you rarely wait at all.",
+                      tags: ["Duck", "Forbidden City", "Queue"], likes: "2.3k", saves: "708",
+                      symbol: "fork.knife", artTint: 0, height: 146, photo: "post-n3", credit: "Mr Wabu / CC BY-SA 2.0",
+                      placeTitle: "Siji Minfu · Forbidden City", comment: "@Zhou: Got there at 10:40 and walked straight in."),
+            ForumPost(author: "Lina", avatar: "L", tint: 0, time: "Yesterday", kind: .restaurant,
+                      title: "Qianmen hutong coffee, best light at 3pm",
+                      body: "Metal Hands hides in a back lane; the two window tables are the quietest. The pour-over runs bright — pair it with a croissant.",
+                      tags: ["Coffee", "Hutong", "Afternoon"], likes: "1.1k", saves: "433",
+                      symbol: "cup.and.saucer.fill", artTint: 1, height: 162, photo: "post-n4", credit: "Arisepeter / CC BY-SA 4.0",
+                      placeTitle: "Metal Hands · Qianmen", comment: "@Bei: Sat there two hours on Sunday, nobody rushed us."),
+            ForumPost(author: "Zhou", avatar: "Z", tint: 2, time: "Yesterday", kind: .spot,
+                      title: "Early morning at the Temple of Heaven, almost empty",
+                      body: "Enter from the south gate; the Echo Wall is quietest before nine. Cypress shadows fall on red walls — every shot works.",
+                      tags: ["Temple of Heaven", "Morning", "Architecture"], likes: "2.8k", saves: "610",
+                      symbol: "building.columns.fill", artTint: 2, height: 130, photo: "post-n5", credit: "Balon Greyjoy / CC0",
+                      placeTitle: "Temple of Heaven", comment: "@Hutong Files: Locals do tai chi then — keep your voice down."),
+            ForumPost(author: "Hutong Files", avatar: "H", tint: 3, time: "2 days ago", kind: .event,
+                      title: "Saturday night market at the Drum Tower: stall list updated",
+                      body: "Handmade goods, vinyl and mulled wine; busiest after 19:00. Metro Line 8, Shichahai exit A.",
+                      tags: ["Night market", "Drum & Bell Towers", "Weekend"], likes: "986", saves: "241",
+                      symbol: "moon.stars.fill", artTint: 3, height: 154, photo: "post-n6", credit: "Marek Śliwecki / CC BY-SA 4.0",
+                      eventTitle: "Hutong Night Market · Free entry", comment: "@Ken: Signed up — see you there."),
+            ForumPost(author: "Zhao", avatar: "Z", tint: 1, time: "2 days ago", kind: .gift,
+                      title: "Daoxiangcun loose pastries vs gift boxes: how locals buy",
+                      body: "Loose pastries are sold by weight — fresher, and you can mix flavors. Boxes are for giving; no need for yourself.",
+                      tags: ["Gifts", "Daoxiangcun", "Save money"], likes: "1.7k", saves: "529",
+                      symbol: "gift.fill", artTint: 5, height: 138, photo: "post-n7", credit: "Zicheng zic / CC BY 4.0",
+                      placeTitle: "Daoxiangcun · Local gifts", comment: "@Xiaoman: Get the date paste and ox-tongue pastry."),
+            ForumPost(author: "Zhe", avatar: "Z", tint: 3, time: "3 days ago", kind: .route,
+                      title: "Shichahai after dark: 5 stops, 3 small bars",
+                      body: "Start at Yinding Bridge and follow the north shore to the Drum Tower. Quieter after nine; bring a jacket, it's windy.",
+                      tags: ["Night", "Shichahai", "Bars"], likes: "860", saves: "377",
+                      symbol: "figure.walk", artTint: 2, height: 126, photo: "post-n8", credit: "Morio / CC BY-SA 4.0",
+                      routeIndex: 2, comment: "@Lina: The brewpub by Yinding Bridge is solid."),
+            ForumPost(author: "Bei", avatar: "B", tint: 0, time: "3 days ago", kind: .gift,
+                      title: "Corner-tower magnets are back — buy on the way in",
+                      body: "The Shenwu Gate shop restocks in the morning and the corner-tower series sells out. Two per person — don't wait for closing.",
+                      tags: ["Palace shop", "Magnets", "Limited"], likes: "604", saves: "188",
+                      symbol: "sparkles", artTint: 0, height: 112, photo: "post-n9", credit: "Morio / CC BY-SA 4.0",
+                      placeTitle: "Palace Museum Shop · Magnets", comment: "@Zhou: They had the sunset color yesterday. Go."),
+            ForumPost(author: "May", avatar: "M", tint: 5, time: "4 days ago", kind: .restaurant,
+                      title: "40 minutes in line at Man Heng Ji — worth it?",
+                      body: "Hand-cut lamb with sesame dip; once the copper pot boils you know the wait paid off. Take a number before 17:00 and halve it.",
+                      tags: ["Hotpot", "Niujie", "Queue"], likes: "1.9k", saves: "522",
+                      symbol: "flame.fill", artTint: 3, height: 140, photo: "post-n10", credit: "ZhengZhou / CC BY-SA 4.0",
+                      placeTitle: "Man Heng Ji · Niujie", comment: "@Zhao: Worth it. Order extra sweet garlic."),
+            ForumPost(author: "Lina", avatar: "L", tint: 0, time: "5 days ago", kind: .spot,
+                      title: "Boating at Beihai: the White Dagoba from the water",
+                      body: "After 4pm the sun softens; a pedal boat for an hour is just right. They stop rentals when it's windy.",
+                      tags: ["Beihai", "Boating", "Family"], likes: "2.1k", saves: "498",
+                      symbol: "sailboat.fill", artTint: 1, height: 148, photo: "post-n11", credit: "Daniel Case / CC BY-SA 3.0",
+                      placeTitle: "Beihai Park", comment: "@Bei: With kids, take the electric boat.")
+        ]
+    }
+
+    private static func makeAttractions() -> [AttractionBooking] {
+        [
+            AttractionBooking(
+                title: "Forbidden City", date: "10/15", day: 1, time: "09:00 – 12:00",
+                price: "¥60 · 2 adults", symbol: "building.columns.fill", tint: 3,
+                booked: true, code: "ROAMCHINA-7Q2K"
+            ),
+            AttractionBooking(
+                title: "Badaling Great Wall", date: "10/16", day: 2, time: "08:30 meet",
+                price: "¥40 · cable car included", symbol: "mountain.2.fill", tint: 2
+            ),
+            AttractionBooking(
+                title: "Summer Palace", date: "10/17", day: 3, time: "09:00 – 12:00",
+                price: "¥60 · combined ticket", symbol: "leaf.fill", tint: 4
+            ),
+            AttractionBooking(
+                title: "National Museum of China", date: "10/17", day: 3, time: "14:00 – 16:30",
+                price: "Free · real-name booking", symbol: "building.columns", tint: 1
+            )
         ]
     }
 
     private static func makeLocalEvents() -> [LocalEvent] {
         [
             LocalEvent(
-                title: "胡同夜市 · 免费入场",
-                subtitle: "手作、黑胶与小吃，本地摊主出摊",
-                date: "10/18 周六",
+                title: "Hutong Night Market · Free entry",
+                subtitle: "Handmade goods, vinyl and snacks from local stalls",
+                date: "10/18 Sat",
                 time: "18:00 – 22:00",
-                place: "钟鼓楼广场 · 距酒店 35 分钟",
-                host: "@Lucia 社区",
-                fee: "免费",
+                place: "Drum & Bell Towers square · 35 min from hotel",
+                host: "@Pico Community",
+                fee: "Free",
                 attendees: 128,
                 tint: 0
             ),
             LocalEvent(
-                title: "白塔寺旧物市集",
-                subtitle: "老相机、旧书与手冲咖啡，摊主多是本地藏家",
-                date: "11/01 周六",
+                title: "Baita Temple flea market",
+                subtitle: "Old cameras, second-hand books and pour-over coffee, run by local collectors",
+                date: "11/01 Sat",
                 time: "13:00 – 19:00",
-                place: "白塔寺东夹道 · 距酒店 20 分钟",
-                host: "@胡同档案",
-                fee: "免费",
+                place: "Baita Temple east lane · 20 min from hotel",
+                host: "@Hutong Files",
+                fee: "Free",
                 attendees: 64,
                 tint: 1
             ),
             LocalEvent(
-                title: "中轴线夜骑 · 自备车",
-                subtitle: "从永定门骑到钟鼓楼，领队讲城楼故事",
-                date: "11/02 周日",
+                title: "Central Axis night ride · BYO bike",
+                subtitle: "Yongdingmen to the Drum Tower with a guide on the old city gates",
+                date: "11/02 Sun",
                 time: "19:00",
-                place: "永定门公园北门",
+                place: "Yongdingmen Park, north gate",
                 host: "@Ken",
                 fee: "¥20",
                 attendees: 37,

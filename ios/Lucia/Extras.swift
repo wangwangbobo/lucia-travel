@@ -5,89 +5,102 @@ import UIKit
 
 struct NotesPoster: View {
     @EnvironmentObject private var model: AppModel
-    @Environment(\.dismiss) private var dismiss
     @State private var copied = false
 
     private var cleanName: String {
-        model.routeName.replacingOccurrences(of: " · 草稿", with: "")
+        model.routeName.replacingOccurrences(of: " · Draft", with: "")
     }
 
     var body: some View {
-        ScrollView(.vertical, showsIndicators: false) {
-            VStack(spacing: 14) {
-                topBar
-                poster
-                ShareLink(item: model.routeSummary) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "square.and.arrow.up")
-                            .font(.system(size: 11, weight: .bold))
-                        Text("分享这篇笔记")
-                            .font(.system(size: 12, weight: .bold))
-                    }
-                    .foregroundStyle(Palette.ink)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 45)
-                    .background(Capsule().fill(Palette.lime))
-                    .overlay(Capsule().strokeBorder(Palette.ink, lineWidth: 1.2))
-                    .compositingGroup()
-                    .shadow(color: Palette.ink.opacity(0.15), radius: 0, x: 0, y: 3)
-                }
+        VStack(spacing: 0) {
+            topBar
+                .padding(.horizontal, 20)
+                .padding(.top, 10)
+                .padding(.bottom, 6)
 
-                Button {
-                    UIPasteboard.general.string = model.routeSummary
-                    withAnimation { copied = true }
-                    Haptics.success()
-                } label: {
-                    HStack(spacing: 6) {
-                        Image(systemName: copied ? "checkmark" : "doc.on.doc")
-                            .font(.system(size: 10, weight: .semibold))
-                        Text(copied ? "文案已复制" : "复制文案")
-                            .font(.system(size: 11.5, weight: .medium))
+            ScrollView(.vertical, showsIndicators: false) {
+                VStack(spacing: 14) {
+                    poster
+                    ShareLink(item: model.routeSummary) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "square.and.arrow.up")
+                                .font(.system(size: 11, weight: .bold))
+                            Text("Share this note")
+                                .font(.system(size: 12, weight: .bold))
+                        }
+                        .foregroundStyle(Palette.ink)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 45)
+                        .background(Capsule().fill(Palette.lime))
+                        .overlay(Capsule().strokeBorder(Palette.ink, lineWidth: 1.2))
+                        .compositingGroup()
+                        .shadow(color: Palette.ink.opacity(0.15), radius: 0, x: 0, y: 3)
                     }
-                    .foregroundStyle(Palette.ink)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 43)
-                    .background(Capsule().fill(Palette.paper))
-                    .overlay(Capsule().strokeBorder(Palette.ink, lineWidth: 1.1))
-                }
-                .buttonStyle(PressableButtonStyle())
 
-                Text("笔记会包含路线顺序、时间与距离，适合发到社交平台。")
-                    .font(.system(size: 9.5))
-                    .foregroundStyle(Palette.ink3)
-                    .multilineTextAlignment(.center)
+                    Button {
+                        UIPasteboard.general.string = model.routeSummary
+                        withAnimation { copied = true }
+                        Haptics.success()
+                    } label: {
+                        HStack(spacing: 6) {
+                            Image(systemName: copied ? "checkmark" : "doc.on.doc")
+                                .font(.system(size: 10, weight: .semibold))
+                            Text(copied ? "Caption copied" : "Copy caption")
+                                .font(.system(size: 11.5, weight: .medium))
+                        }
+                        .foregroundStyle(Palette.ink)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 43)
+                        .background(Capsule().fill(Palette.paper))
+                        .overlay(Capsule().strokeBorder(Palette.ink, lineWidth: 1.1))
+                    }
+                    .buttonStyle(PressableButtonStyle())
+
+                    Text("The note includes route order, times and distance — ready for social.")
+                        .font(.system(size: 9.5))
+                        .foregroundStyle(Palette.ink3)
+                        .multilineTextAlignment(.center)
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 4)
+                .padding(.bottom, 30)
             }
-            .padding(.horizontal, 20)
-            .padding(.top, 10)
-            .padding(.bottom, 30)
         }
         .background(Palette.bg.ignoresSafeArea())
     }
 
     private var topBar: some View {
         HStack {
-            Text("可视化笔记")
+            Text("Visual note")
                 .font(.system(size: 21, weight: .black))
                 .foregroundStyle(Palette.ink)
             Spacer()
             Button {
-                dismiss()
+                Haptics.tap()
+                closeNote()
             } label: {
                 Image(systemName: "xmark")
                     .font(.system(size: 11, weight: .black))
                     .foregroundStyle(Palette.ink)
-                    .frame(width: 33, height: 33)
+                    .frame(width: 40, height: 40)
                     .background(Circle().fill(Palette.paper))
                     .overlay(Circle().strokeBorder(Palette.ink, lineWidth: 1.1))
+                    .contentShape(Circle())
             }
             .buttonStyle(PressableButtonStyle())
+            .simultaneousGesture(TapGesture().onEnded { closeNote() })
+            .accessibilityLabel("Close visual note")
         }
+    }
+
+    private func closeNote() {
+        model.notesOpen = false
     }
 
     private var poster: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack(alignment: .center) {
-                Eyebrow(text: "LUCIA · CITYWALK")
+                Eyebrow(text: "ROAMCHINA · CITYWALK")
                 Spacer()
                 StickerLabel(text: "NO. 014", fill: Palette.mustard, rotation: 4)
             }
@@ -98,7 +111,7 @@ struct NotesPoster: View {
                     .tracking(-0.6)
                     .foregroundStyle(Palette.ink)
                     .lineSpacing(1)
-                Text("2026.10.15 · 北京 · 与林、周同行")
+                Text("2026.10.15 · Beijing · With Lina & Zhou")
                     .font(.system(size: 9.5, weight: .medium, design: .monospaced))
                     .foregroundStyle(Palette.ink3)
             }
@@ -141,9 +154,9 @@ struct NotesPoster: View {
             .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(Palette.ink.opacity(0.25), lineWidth: 1))
 
             HStack(spacing: 10) {
-                Label("6 站", systemImage: "mappin.and.ellipse")
+                Label("6 stops", systemImage: "mappin.and.ellipse")
                 Label("4.2 km", systemImage: "figure.walk")
-                Label("约 5 小时", systemImage: "clock")
+                Label("~5 hr", systemImage: "clock")
                 Spacer()
                 Image(systemName: "sun.max.fill")
                     .foregroundStyle(Palette.accent)
@@ -157,11 +170,11 @@ struct NotesPoster: View {
                 .frame(height: 0.8)
 
             HStack {
-                Text("慢一点，才看得见北京。")
+                Text("Slow down — Beijing shows itself.")
                     .font(.system(size: 10.5, design: .serif))
                     .foregroundStyle(Palette.ink3)
                 Spacer()
-                Text("lucia.travel")
+                Text("roamchina.travel")
                     .font(.system(size: 8, design: .monospaced))
                     .foregroundStyle(Palette.ink3)
             }
@@ -203,7 +216,7 @@ struct BigTypeView: View {
 
             VStack(spacing: 0) {
                 HStack {
-                    Eyebrow(text: "给店员看", color: Palette.paper.opacity(0.45))
+                    Eyebrow(text: "SHOW STAFF", color: Palette.paper.opacity(0.45))
                     Spacer()
                     Button {
                         dismiss()
@@ -252,7 +265,7 @@ struct BigTypeView: View {
                         HStack(spacing: 7) {
                             Image(systemName: "speaker.wave.2.fill")
                                 .font(.system(size: 12, weight: .bold))
-                            Text("播放中文")
+                            Text("Play Chinese")
                                 .font(.system(size: 12.5, weight: .bold))
                         }
                         .foregroundStyle(Palette.ink)
@@ -263,7 +276,7 @@ struct BigTypeView: View {
                     }
                     .buttonStyle(PressableButtonStyle())
 
-                    Text("无需网络 · 已保存在离线语句库")
+                    Text("No network needed · Saved in your offline pack")
                         .font(.system(size: 9.5))
                         .foregroundStyle(Palette.paper.opacity(0.35))
                 }
@@ -289,10 +302,10 @@ struct ReorderSheet: View {
         VStack(spacing: 0) {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("调整顺序")
+                    Text("Reorder stops")
                         .font(.system(size: 21, weight: .black))
                         .foregroundStyle(Palette.ink)
-                    Text("拖动右侧手柄，时间会自动重算")
+                    Text("Drag the handles — times recalculate")
                         .font(.system(size: 9.5, weight: .medium, design: .monospaced))
                         .foregroundStyle(Palette.ink3)
                 }
@@ -300,7 +313,7 @@ struct ReorderSheet: View {
                 Button {
                     dismiss()
                 } label: {
-                    Text("完成")
+                    Text("Done")
                         .font(.system(size: 11.5, weight: .bold))
                         .foregroundStyle(Palette.ink)
                         .padding(.horizontal, 16)
@@ -315,7 +328,7 @@ struct ReorderSheet: View {
             .padding(.bottom, 12)
 
             List {
-                ForEach(model.stops) { stop in
+                ForEach(model.reorderStops) { stop in
                     HStack(spacing: 10) {
                         Text(stop.time)
                             .font(.system(size: 10, weight: .medium, design: .monospaced))
@@ -334,7 +347,7 @@ struct ReorderSheet: View {
                     .listRowSeparatorTint(Palette.lineSoft)
                 }
                 .onMove { source, destination in
-                    model.moveStops(from: source, to: destination)
+                    model.moveReorderStops(from: source, to: destination)
                 }
             }
             .listStyle(.plain)
@@ -360,17 +373,17 @@ struct LegalSheet: View {
     private var sections: [(String, String)] {
         if kind == .privacy {
             return [
-                ("我们保存什么", "你的行程、清单勾选状态和离线语句包只保存在本机。社区浏览记录不会关联到你的身份。"),
-                ("不会上传什么", "护照号、手机号、支付信息不经过 Lucia。需要预约门票时，会跳转到官方渠道完成。"),
-                ("离线使用", "地图、翻译与应急语句支持离线。离线状态不会上传位置，只有你主动分享时才会生成链接。"),
-                ("你的选择", "你可以在「我的」里关闭通知，或长按清单条目删除自定义内容。")
+                ("What we store", "Your trip, checklist ticks and offline phrase pack stay on this device. Community browsing isn't linked to your identity."),
+                ("What we never upload", "Passport numbers, phone numbers and payment details never pass through Pico. Ticket bookings open the official channel instead."),
+                ("Offline use", "Maps, translation and emergency phrases work offline. Offline mode never uploads your location; a link is created only when you choose to share."),
+                ("Your choices", "Turn off notifications under Me, or long-press a checklist item to delete your own additions.")
             ]
         }
         return [
-            ("服务范围", "Lucia 提供行程规划、行前准备、翻译与社区内容浏览。门票、酒店与交通由第三方官方渠道提供。"),
-            ("内容与建议", "AI 建议基于公开信息与你的偏好生成，实际开放时间、票价与天气请以官方信息为准。"),
-            ("社区规范", "请分享真实的体验，不发布侵权、广告或不友善内容。违规内容会被隐藏。"),
-            ("费用", "基础功能免费。部分离线包与增值服务可能会收费，购买前会明确提示。")
+            ("What Pico covers", "Pico offers trip planning, prep, translation and community browsing. Tickets, hotels and transport come from official third-party channels."),
+            ("Content & advice", "AI suggestions draw on public information and your preferences. Check official sources for opening hours, prices and weather."),
+            ("Community rules", "Share real experiences. No infringing, promotional or unfriendly content — it will be hidden."),
+            ("Cost", "Core features are free. Some offline packs and extras may be paid, always shown before you buy.")
         ]
     }
 
@@ -379,7 +392,7 @@ struct LegalSheet: View {
             VStack(alignment: .leading, spacing: 16) {
                 HStack {
                     VStack(alignment: .leading, spacing: 3) {
-                        Eyebrow(text: "LUCIA · LEGAL")
+                        Eyebrow(text: "ROAMCHINA · LEGAL")
                         Text(kind.title)
                             .font(.system(size: 28, weight: .black))
                             .tracking(-0.4)
@@ -399,7 +412,7 @@ struct LegalSheet: View {
                     .buttonStyle(PressableButtonStyle())
                 }
 
-                Text("更新于 2026 年 10 月 · 适用于 Lucia iOS v1.0")
+                Text("Updated October 2026 · For RoamChina iOS v1.0")
                     .font(.system(size: 9.5))
                     .foregroundStyle(Palette.ink3)
 
@@ -419,7 +432,7 @@ struct LegalSheet: View {
                     .overlay(RoundedRectangle(cornerRadius: 17, style: .continuous).strokeBorder(Palette.ink, lineWidth: 1.1))
                 }
 
-                Text("如有疑问：hello@lucia.travel")
+                Text("Questions: hello@roamchina.travel")
                     .font(.system(size: 9.5))
                     .foregroundStyle(Palette.ink3)
                     .padding(.bottom, 20)
@@ -483,8 +496,8 @@ struct PlaceSheet: View {
                 }
 
                 VStack(alignment: .leading, spacing: 9) {
-                    Eyebrow(text: "为什么推荐")
-                    Text("本地人也常去，避开旅行团的高峰时段体验更好。建议在开门前 20 分钟到，或者错峰到下午 15:00 之后。")
+                    Eyebrow(text: "WHY IT'S HERE")
+                    Text("Locals come here too — it's better outside tour-group hours. Arrive 20 minutes before opening, or come after 15:00.")
                         .font(.system(size: 11))
                         .foregroundStyle(Palette.ink2)
                         .lineSpacing(4)
@@ -495,24 +508,24 @@ struct PlaceSheet: View {
                 .overlay(RoundedRectangle(cornerRadius: 17, style: .continuous).strokeBorder(Palette.ink, lineWidth: 1.1))
 
                 VStack(alignment: .leading, spacing: 0) {
-                    infoRow(icon: "clock", title: "营业时间", value: "10:00 – 22:00")
+                    infoRow(icon: "clock", title: "Hours", value: "10:00 – 22:00")
                     SoftDivider().padding(.leading, 38)
-                    infoRow(icon: "location", title: "距离", value: "距酒店 2.4 km · 地铁 2 站")
+                    infoRow(icon: "location", title: "Distance", value: "2.4 km from hotel · 2 metro stops")
                     SoftDivider().padding(.leading, 38)
-                    infoRow(icon: "figure.walk", title: "建议停留", value: "45 分钟 – 1 小时")
+                    infoRow(icon: "figure.walk", title: "Suggested stay", value: "45 min – 1 hr")
                 }
                 .padding(.horizontal, 13)
                 .background(RoundedRectangle(cornerRadius: 17, style: .continuous).fill(Palette.paper))
                 .overlay(RoundedRectangle(cornerRadius: 17, style: .continuous).strokeBorder(Palette.ink, lineWidth: 1.1))
 
                 Button {
-                    model.openAssistant("论坛 · \(place.title)")
+                    model.openAssistant("Community · \(place.title)")
                 } label: {
                     HStack(spacing: 8) {
                         Image(systemName: "sparkles")
                             .font(.system(size: 11, weight: .bold))
                             .foregroundStyle(Palette.ink)
-                        Text("问问 Lucia：这里适合我第几天去？")
+                        Text("Ask Pico: which day should I come?")
                             .font(.system(size: 11, weight: .semibold))
                             .foregroundStyle(Palette.ink)
                         Spacer()
@@ -532,7 +545,7 @@ struct PlaceSheet: View {
                             .font(LuciaType.serif(30, italic: true))
                             .foregroundStyle(Palette.accent)
                             .frame(height: 20, alignment: .top)
-                        Text("下午三点以后去几乎不用等位，鸭皮还是脆的。")
+                        Text("After 3pm there's barely a wait, and the duck skin is still crisp.")
                             .font(.system(size: 11.5, weight: .medium))
                             .foregroundStyle(Palette.ink2)
                             .lineSpacing(3)
@@ -544,18 +557,18 @@ struct PlaceSheet: View {
                             .frame(width: 17, height: 17)
                             .background(Circle().fill(Palette.periwinkle))
                             .overlay(Circle().strokeBorder(Palette.ink, lineWidth: 0.9))
-                        Text("Lina · 社区笔记 · 3 天前")
+                        Text("Lina · Community note · 3 days ago")
                             .font(.system(size: 9, weight: .medium, design: .monospaced))
                             .foregroundStyle(Palette.ink3)
                         Spacer(minLength: 0)
-                        TagView(text: "86 人收藏", style: .neutral)
+                        TagView(text: "86 saves", style: .neutral)
                     }
                 }
                 .padding(14)
                 .background(RoundedRectangle(cornerRadius: 17, style: .continuous).fill(Palette.paper))
                 .overlay(RoundedRectangle(cornerRadius: 17, style: .continuous).strokeBorder(Palette.ink, lineWidth: 1.1))
                 .overlay(alignment: .topLeading) {
-                    StickerLabel(text: "社区原话", fill: Palette.pink, rotation: -4, icon: "quote.bubble.fill")
+                    StickerLabel(text: "FROM THE COMMUNITY", fill: Palette.pink, rotation: -4, icon: "quote.bubble.fill")
                         .offset(x: 10, y: -11)
                 }
                 .padding(.top, 8)
@@ -581,7 +594,7 @@ struct PlaceSheet: View {
                     HStack(spacing: 5) {
                         Image(systemName: added ? "checkmark" : "text.badge.plus")
                             .font(.system(size: 10, weight: .bold))
-                        Text(added ? "已加入清单" : "加入清单")
+                        Text(added ? "Added to list" : "Add to list")
                             .font(.system(size: 11, weight: .bold))
                     }
                     .foregroundStyle(Palette.ink)
@@ -643,9 +656,9 @@ struct ComposePost: View {
     @State private var photos: [Int] = []
     @State private var attachRoute: Bool
 
-    private let tags = ["餐厅", "景点", "路线", "伴手礼", "活动"]
+    private let tags = ["Food", "Sights", "Routes", "Gifts", "Events"]
 
-    init(initialTag: String = "餐厅", initialAttachRoute: Bool = false) {
+    init(initialTag: String = "Food", initialAttachRoute: Bool = false) {
         _tag = State(initialValue: initialTag)
         _attachRoute = State(initialValue: initialAttachRoute)
     }
@@ -655,8 +668,8 @@ struct ComposePost: View {
             VStack(alignment: .leading, spacing: 15) {
                 HStack {
                     VStack(alignment: .leading, spacing: 3) {
-                        Eyebrow(text: "社区 · 发布")
-                        Text("分享你在北京")
+                        Eyebrow(text: "COMMUNITY · POST")
+                        Text("Share your Beijing")
                             .font(.system(size: 26, weight: .black))
                             .tracking(-0.4)
                             .foregroundStyle(Palette.ink)
@@ -675,7 +688,7 @@ struct ComposePost: View {
                     .buttonStyle(PressableButtonStyle())
                 }
 
-                TextField("给它一个标题，比如「东四胡同的咖啡地图」", text: $title)
+                TextField("Give it a title, e.g. “Dongsi coffee map”", text: $title)
                     .font(.system(size: 13, weight: .semibold))
                     .textFieldStyle(.plain)
                     .padding(13)
@@ -684,7 +697,7 @@ struct ComposePost: View {
 
                 ZStack(alignment: .topLeading) {
                     if bodyText.isEmpty {
-                        Text("说说具体体验：点了什么、多少钱、什么时候去最合适…")
+                        Text("Tell us what you tried: what you ordered, what it cost, the best time to go…")
                             .font(.system(size: 11.5))
                             .foregroundStyle(Palette.ink3)
                             .padding(.horizontal, 17)
@@ -701,7 +714,7 @@ struct ComposePost: View {
                 .overlay(RoundedRectangle(cornerRadius: 15, style: .continuous).strokeBorder(Palette.ink, lineWidth: 1.1))
 
                 VStack(alignment: .leading, spacing: 7) {
-                    Eyebrow(text: "照片")
+                    Eyebrow(text: "PHOTOS")
                     HStack(spacing: 8) {
                         ForEach(photos.indices, id: \.self) { index in
                             PhotoTile(symbol: index == 0 ? "fork.knife" : "building.columns", tint: index + 1, height: 76)
@@ -717,7 +730,7 @@ struct ComposePost: View {
                                 VStack(spacing: 5) {
                                     Image(systemName: "camera")
                                         .font(.system(size: 15, weight: .medium))
-                                    Text(photos.isEmpty ? "添加照片" : "再加一张")
+                                    Text(photos.isEmpty ? "Add photos" : "Add another")
                                         .font(.system(size: 9, weight: .medium))
                                 }
                                 .foregroundStyle(Palette.ink2)
@@ -732,13 +745,13 @@ struct ComposePost: View {
                         }
                         Spacer(minLength: 0)
                     }
-                    Text("真实照片更容易被收藏 · 最多 9 张")
+                    Text("Real photos get saved more · Up to 9")
                         .font(.system(size: 9))
                         .foregroundStyle(Palette.ink3)
                 }
 
                 VStack(alignment: .leading, spacing: 7) {
-                    Eyebrow(text: "分类")
+                    Eyebrow(text: "CATEGORY")
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 7) {
                             ForEach(tags, id: \.self) { option in
@@ -754,7 +767,7 @@ struct ComposePost: View {
                     Image(systemName: "lightbulb")
                         .font(.system(size: 12, weight: .bold))
                         .foregroundStyle(Palette.ink)
-                    Text("真实、具体、带上价格，更容易被收藏。")
+                    Text("Be real, be specific, add prices — that's what gets saved.")
                         .font(.system(size: 10, weight: .medium))
                         .foregroundStyle(Palette.ink2)
                 }
@@ -774,10 +787,10 @@ struct ComposePost: View {
                             .background(Circle().fill(Palette.lime))
                             .overlay(Circle().strokeBorder(Palette.ink, lineWidth: 1))
                         VStack(alignment: .leading, spacing: 2) {
-                            Text("关联我的路线")
+                            Text("Link my route")
                                 .font(.system(size: 11.5, weight: .semibold))
                                 .foregroundStyle(Palette.ink)
-                            Text("\(model.routeName) · \(model.stops.count) 站 · 4.2 km")
+                            Text("\(model.routeName) · \(model.stops.count) stops · 4.2 km")
                                 .font(.system(size: 9.5, weight: .medium))
                                 .foregroundStyle(Palette.ink3)
                         }
@@ -798,7 +811,7 @@ struct ComposePost: View {
                 HStack(spacing: 7) {
                     DoodleView(kind: .squiggle, color: Palette.ink3.opacity(0.55), lineWidth: 1.2)
                         .frame(width: 24, height: 7)
-                    Text("发布后会出现在「社区 · 北京」，可随时编辑或删除。")
+                    Text("Posts appear under Community · Beijing — edit or delete anytime.")
                         .font(.system(size: 9, weight: .medium))
                         .foregroundStyle(Palette.ink3)
                 }
@@ -810,10 +823,10 @@ struct ComposePost: View {
         }
         .safeAreaInset(edge: .bottom) {
             Button {
-                model.toast("已发布 · 感谢你的分享", icon: "paperplane.fill")
+                model.toast("Posted · Thanks for sharing", icon: "paperplane.fill")
                 dismiss()
             } label: {
-                Text("发布到社区")
+                Text("Post to community")
                     .font(.system(size: 12.5, weight: .bold))
                     .foregroundStyle(title.isEmpty ? Palette.ink3 : Palette.ink)
                     .frame(maxWidth: .infinity)

@@ -47,6 +47,17 @@ struct PlanView: View {
                 .presentationCornerRadius(30)
                 .presentationBackground(Palette.bg)
         }
+        .onAppear {
+            if model.pendingSimilar {
+                model.pendingSimilar = false
+                showSimilar = true
+            }
+        }
+        .onChange(of: model.pendingSimilar) { _, pending in
+            guard pending else { return }
+            model.pendingSimilar = false
+            showSimilar = true
+        }
         #if DEBUG
         .onAppear {
             let args = ProcessInfo.processInfo.arguments
@@ -67,7 +78,7 @@ struct PlanView: View {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 5) {
                     HStack(spacing: 7) {
-                        Eyebrow(text: "我的计划 / CITYWALK")
+                        Eyebrow(text: "MY PLAN / CITYWALK")
                         StickerLabel(text: "DAY 02", fill: Palette.lime, rotation: 3)
                     }
                     Text(model.routeName)
@@ -76,18 +87,41 @@ struct PlanView: View {
                         .foregroundStyle(Palette.ink)
                         .lineLimit(1)
                         .minimumScaleFactor(0.75)
-                    Text("\(model.stops.count) 站 · 4.2 km · 约 5 小时")
+                    Text("\(model.stops.count) stops · 4.2 km · ~5 hr")
                         .font(.system(size: 9.5, weight: .semibold, design: .monospaced))
                         .foregroundStyle(Palette.ink2)
                 }
                 Spacer()
-                HStack(spacing: 8) {
-                    AvatarStack(names: ["林", "周"], size: 28)
-                    IconCircleButton(icon: "square.and.arrow.up", size: 36) {
-                        model.shareRoute()
+                VStack(alignment: .trailing, spacing: 8) {
+                    Button {
+                        Haptics.tap()
+                        model.notesOpen = true
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "doc.text.image")
+                                .font(.system(size: 9, weight: .bold))
+                            Text("Make a note")
+                                .font(.system(size: 10, weight: .bold))
+                        }
+                        .foregroundStyle(Palette.ink)
+                        .padding(.horizontal, 11)
+                        .frame(height: 31)
+                        .background(Capsule().fill(Palette.lime))
+                        .overlay(Capsule().strokeBorder(Palette.ink, lineWidth: 1.2))
+                        .compositingGroup()
+                        .shadow(color: Palette.ink.opacity(0.16), radius: 0, x: 0, y: 2)
+                    }
+                    .buttonStyle(PressableButtonStyle(scale: 0.96))
+                    .accessibilityLabel("Generate trip note")
+
+                    HStack(spacing: 6) {
+                        AvatarStack(names: ["L", "Z"], size: 27)
+                        IconCircleButton(icon: "square.and.arrow.up", size: 31) {
+                            model.shareRoute()
+                        }
                     }
                 }
-                .padding(.top, 2)
+                .padding(.top, 1)
             }
 
             HStack(spacing: 6) {
@@ -103,7 +137,7 @@ struct PlanView: View {
                     HStack(spacing: 4) {
                         Image(systemName: "hand.draw.fill")
                             .font(.system(size: 8.5, weight: .bold))
-                        Text("拖动编号点位")
+                        Text("Drag stops")
                             .font(.system(size: 9.5, weight: .bold))
                     }
                     .foregroundStyle(Palette.ink)
@@ -127,19 +161,19 @@ struct PlanView: View {
 
             HStack(alignment: .center) {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("\(model.stops.count) 站 · 4.2 km")
+                    Text("\(model.stops.count) stops · 4.2 km")
                         .font(.system(size: 17, weight: .heavy))
                         .foregroundStyle(Palette.ink)
                     if model.mapEditMode {
                         HStack(spacing: 4) {
                             Image(systemName: "hand.draw")
                                 .font(.system(size: 8, weight: .bold))
-                            Text("拖动编号圆点 · 路线实时重算")
+                            Text("Drag pins · route recalculates")
                                 .font(.system(size: 9, weight: .semibold, design: .monospaced))
                         }
                         .foregroundStyle(Palette.accent)
                     } else {
-                        Text("约 5 小时 · 步行 + 地铁")
+                        Text("~5 hr · Walk + subway")
                             .font(.system(size: 9, weight: .medium, design: .monospaced))
                             .foregroundStyle(Palette.ink3)
                     }
@@ -152,7 +186,7 @@ struct PlanView: View {
                         HStack(spacing: 4) {
                             Image(systemName: model.mapEditMode ? "checkmark" : "hand.draw")
                                 .font(.system(size: 9, weight: .bold))
-                            Text(model.mapEditMode ? "完成" : "调点位")
+                            Text(model.mapEditMode ? "Done" : "Edit pins")
                                 .font(.system(size: 10, weight: .semibold))
                         }
                         .foregroundStyle(Palette.ink)
@@ -171,7 +205,7 @@ struct PlanView: View {
                         HStack(spacing: 4) {
                             Image(systemName: "arrow.up.arrow.down")
                                 .font(.system(size: 9, weight: .bold))
-                            Text("编辑顺序")
+                            Text("Reorder")
                                 .font(.system(size: 10, weight: .semibold))
                         }
                         .foregroundStyle(Palette.ink)
@@ -193,12 +227,12 @@ struct PlanView: View {
                         .frame(width: 23, height: 23)
                         .background(Circle().fill(Palette.lime))
                         .overlay(Circle().strokeBorder(Palette.ink, lineWidth: 0.9))
-                    Text("Lucia 建议：什刹海挪到 13:00")
+                    Text("Pico: move Shichahai to 13:00")
                         .font(.system(size: 10, weight: .bold))
                         .foregroundStyle(Palette.ink)
                         .lineLimit(1)
                         .minimumScaleFactor(0.82)
-                    Text("少走 1.2 km")
+                    Text("1.2 km less")
                         .font(.system(size: 8, weight: .medium, design: .monospaced))
                         .foregroundStyle(Palette.ink2)
                         .lineLimit(1)
@@ -206,7 +240,7 @@ struct PlanView: View {
                     Button {
                         model.applyRouteSuggestion()
                     } label: {
-                        Text("应用")
+                        Text("Apply")
                             .font(.system(size: 9.5, weight: .bold))
                             .foregroundStyle(Palette.paper)
                             .padding(.horizontal, 10)
@@ -227,55 +261,6 @@ struct PlanView: View {
                 )
                 .padding(.horizontal, 14)
                 .transition(.opacity.combined(with: .move(edge: .top)))
-            }
-
-            if !model.mapEditMode {
-                HStack(spacing: 7) {
-                    VStack(alignment: .leading, spacing: 1) {
-                        HStack(spacing: 3) {
-                            Image(systemName: "square.stack.3d.up.fill")
-                                .font(.system(size: 8, weight: .bold))
-                            Text("相似路线")
-                                .font(.system(size: 9.5, weight: .bold))
-                        }
-                        .foregroundStyle(Palette.ink)
-                        Text("\(model.similarRoutes.count) 条 · 最高 \(model.similarRoutes.map(\.match).max() ?? 0)%")
-                            .font(.system(size: 6.8, weight: .medium, design: .monospaced))
-                            .foregroundStyle(Palette.ink3)
-                            .lineLimit(1)
-                    }
-                    .frame(width: 72, alignment: .leading)
-
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 6) {
-                            ForEach(model.similarRoutes) { route in
-                                Button {
-                                    Haptics.tap()
-                                    showSimilar = true
-                                } label: {
-                                    similarRouteCard(route)
-                                }
-                                .buttonStyle(PressableButtonStyle(scale: 0.97))
-                            }
-                        }
-                    }
-                    .frame(height: 44)
-
-                    Button {
-                        Haptics.tap()
-                        showSimilar = true
-                    } label: {
-                        Image(systemName: "chevron.right")
-                            .font(.system(size: 8, weight: .black))
-                            .foregroundStyle(Palette.ink)
-                            .frame(width: 26, height: 26)
-                            .background(Circle().fill(Palette.paperWarm))
-                            .overlay(Circle().strokeBorder(Palette.ink, lineWidth: 1))
-                    }
-                    .buttonStyle(PressableButtonStyle(scale: 0.94))
-                }
-                .padding(.horizontal, 14)
-                .transition(.opacity.combined(with: .move(edge: .bottom)))
             }
 
             ScrollView(.vertical, showsIndicators: false) {
@@ -299,12 +284,12 @@ struct PlanView: View {
 
             HStack(spacing: 6) {
                 Button {
-                    model.openAssistant("计划 · 添加地点")
+                    model.openAssistant("Plan · Add a stop")
                 } label: {
                     HStack(spacing: 4) {
                         Image(systemName: "plus")
                             .font(.system(size: 9.5, weight: .bold))
-                        Text("加地点")
+                        Text("Add a stop")
                             .font(.system(size: 10, weight: .semibold))
                     }
                     .foregroundStyle(Palette.ink)
@@ -317,12 +302,12 @@ struct PlanView: View {
 
                 Button {
                     Haptics.tap()
-                    model.notesOpen = true
+                    showSimilar = true
                 } label: {
                     HStack(spacing: 4) {
-                        Image(systemName: "doc.text.image")
+                        Image(systemName: "square.stack.3d.up.fill")
                             .font(.system(size: 9.5, weight: .bold))
-                        Text("生成笔记")
+                        Text("Similar routes")
                             .font(.system(size: 10, weight: .bold))
                     }
                     .foregroundStyle(Palette.ink)
@@ -332,31 +317,8 @@ struct PlanView: View {
                     .overlay(Capsule().strokeBorder(Palette.ink, lineWidth: 1.2))
                 }
                 .buttonStyle(PressableButtonStyle())
+                .accessibilityLabel("View similar routes")
 
-                Button {
-                    Haptics.tap()
-                    model.openAssistant("计划 · \(model.routeName)")
-                } label: {
-                    HStack(spacing: 5) {
-                        Image(systemName: "sparkles")
-                            .font(.system(size: 9, weight: .black))
-                            .foregroundStyle(Palette.ink)
-                            .frame(width: 21, height: 21)
-                            .background(Circle().fill(Palette.lime))
-                            .overlay(Circle().strokeBorder(Palette.ink.opacity(0.8), lineWidth: 0.8))
-                        Text("问问 Lucia")
-                            .font(.system(size: 10.5, weight: .black))
-                            .foregroundStyle(Palette.paper)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 42)
-                    .background(Capsule().fill(Palette.coral))
-                    .overlay(Capsule().strokeBorder(Palette.ink, lineWidth: 1.3))
-                    .compositingGroup()
-                    .shadow(color: Palette.ink.opacity(0.2), radius: 0, x: 0, y: 3)
-                }
-                .buttonStyle(PressableButtonStyle(scale: 0.96))
-                .accessibilityLabel("问问 Lucia 助手")
             }
             .padding(.horizontal, 12)
         }
@@ -371,34 +333,6 @@ struct PlanView: View {
         .shadow(color: Palette.ink.opacity(0.08), radius: 24, x: 0, y: 10)
         .padding(.horizontal, 10)
         .padding(.bottom, 84)
-    }
-
-    private func similarRouteCard(_ route: SimilarRoute) -> some View {
-        HStack(spacing: 6) {
-            Text("\(route.match)%")
-                .font(.system(size: 9.5, weight: .black, design: .rounded))
-                .foregroundStyle(Palette.ink)
-                .padding(.horizontal, 5)
-                .frame(height: 22)
-                .background(Capsule().fill(route.match >= 90 ? Palette.lime : Palette.mustardSoft))
-                .overlay(Capsule().strokeBorder(Palette.ink.opacity(0.7), lineWidth: 0.8))
-
-            VStack(alignment: .leading, spacing: 1) {
-                Text(route.title)
-                    .font(.system(size: 9.5, weight: .bold))
-                    .foregroundStyle(Palette.ink)
-                    .lineLimit(1)
-                Text("\(route.author) · \(route.stops) 站")
-                    .font(.system(size: 7.5, weight: .medium, design: .monospaced))
-                    .foregroundStyle(Palette.ink3)
-                    .lineLimit(1)
-            }
-            Spacer(minLength: 0)
-        }
-        .padding(.horizontal, 7)
-        .frame(width: 168, height: 42)
-        .background(RoundedRectangle(cornerRadius: 13, style: .continuous).fill(Palette.paperWarm))
-        .overlay(RoundedRectangle(cornerRadius: 13, style: .continuous).strokeBorder(Palette.ink, lineWidth: 1))
     }
 
     private var stopChipColors: [Color] {
@@ -430,14 +364,14 @@ struct PlanView: View {
 
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: 5) {
-                        Text(stop.name)
+                        Text(model.say(stop.name))
                             .font(.system(size: 12, weight: .bold))
                             .foregroundStyle(Palette.ink)
                         if let tag = stop.tag {
-                            TagView(text: tag, style: stop.tagStyle)
+                            TagView(text: model.say(tag), style: stop.tagStyle)
                         }
                     }
-                    Text(stop.duration + " · 步行 6 分")
+                    Text(model.say(stop.duration) + " · " + model.say("6 min walk"))
                         .font(.system(size: 8.8, weight: .medium))
                         .foregroundStyle(Palette.ink3)
                 }
@@ -489,7 +423,7 @@ private struct BeijingMap: View {
                 collaborator(name: "Lina", color: Palette.periwinkle,
                              point: CGPoint(x: content.minX + content.width * 0.74,
                                             y: content.minY + content.height * 0.34))
-                collaborator(name: "周", color: Palette.lime,
+                collaborator(name: "Zhou", color: Palette.lime,
                              point: CGPoint(x: content.minX + content.width * 0.26,
                                             y: content.minY + content.height * 0.60))
 
@@ -506,7 +440,7 @@ private struct BeijingMap: View {
                     HStack(spacing: 6) {
                         Image(systemName: "hand.draw.fill")
                             .font(.system(size: 9, weight: .bold))
-                        Text("拖动编号圆点，路线会跟着重算")
+                        Text("Drag numbered pins — the route recalculates")
                             .font(.system(size: 9.5, weight: .semibold))
                     }
                     .foregroundStyle(Palette.paper)
@@ -624,10 +558,10 @@ private struct BeijingMap: View {
         context.stroke(minor, with: .color(Palette.line.opacity(0.65)), style: StrokeStyle(lineWidth: 1, lineCap: .round))
 
         let labels: [(String, CGPoint)] = [
-            ("什刹海", CGPoint(x: content.minX + content.width * 0.16, y: content.minY + content.height * 0.24)),
-            ("南锣鼓巷", CGPoint(x: content.minX + content.width * 0.74, y: content.minY + content.height * 0.22)),
-            ("故宫", CGPoint(x: content.minX + content.width * 0.68, y: content.minY + content.height * 0.64)),
-            ("景山", CGPoint(x: content.minX + content.width * 0.70, y: content.minY + content.height * 0.48))
+            ("Shichahai", CGPoint(x: content.minX + content.width * 0.16, y: content.minY + content.height * 0.24)),
+            ("Nanluoguxiang", CGPoint(x: content.minX + content.width * 0.74, y: content.minY + content.height * 0.22)),
+            ("Forbidden City", CGPoint(x: content.minX + content.width * 0.68, y: content.minY + content.height * 0.64)),
+            ("Jingshan", CGPoint(x: content.minX + content.width * 0.70, y: content.minY + content.height * 0.48))
         ]
         for label in labels {
             context.draw(
@@ -677,7 +611,7 @@ private struct BeijingMap: View {
                 )
             }
             context.draw(
-                Text("14:00 后客流上升")
+                Text("Busy after 14:00")
                     .font(.system(size: 8, weight: .bold))
                     .foregroundColor(Palette.warn),
                 at: CGPoint(x: content.maxX - 46, y: content.maxY - 10),
@@ -754,7 +688,7 @@ private struct BeijingMap: View {
 
             if selected {
                 VStack(spacing: 1) {
-                    Text(stop.name)
+                    Text(model.say(stop.name))
                         .font(.system(size: 9, weight: .bold))
                         .foregroundStyle(Palette.ink)
                     Text(stop.time)
@@ -783,11 +717,11 @@ private struct SimilarRoutesSheet: View {
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 4) {
                         Eyebrow(text: "PLATFORM / MATCH")
-                        Text("和你的路线很像")
+                        Text("Routes like yours")
                             .font(.system(size: 28, weight: .black))
                             .tracking(-0.5)
                             .foregroundStyle(Palette.ink)
-                        Text("从平台已有的 4,208 条路线里挑出 3 条，可直接套用成副本。")
+                        Text("Three picks from 4,208 community routes — apply one as your own copy.")
                             .font(.system(size: 10, weight: .medium))
                             .foregroundStyle(Palette.ink2)
                     }
@@ -808,7 +742,7 @@ private struct SimilarRoutesSheet: View {
                 HStack(spacing: 8) {
                     Image(systemName: "sparkles")
                         .font(.system(size: 12, weight: .bold))
-                    Text("最高匹配 94% · 保留你的故宫预约，少走 1.2 km")
+                    Text("Top match 94% · Keeps your Forbidden City booking · 1.2 km shorter")
                         .font(.system(size: 10.5, weight: .semibold))
                     Spacer(minLength: 0)
                 }
@@ -821,7 +755,7 @@ private struct SimilarRoutesSheet: View {
                     routeCard(route)
                 }
 
-                Text("套用后会生成独立副本，你的改动不会影响原作者。")
+                Text("Applying creates a separate copy — your edits won't change the original.")
                     .font(.system(size: 9, weight: .medium))
                     .foregroundStyle(Palette.ink3)
                     .padding(.bottom, 18)
@@ -846,7 +780,7 @@ private struct SimilarRoutesSheet: View {
                     Text(route.title)
                         .font(.system(size: 16, weight: .black))
                         .foregroundStyle(Palette.ink)
-                    Text("\(route.author) · \(route.stops) 站 · \(route.distance) · \(route.duration)")
+                    Text("\(route.author) · \(route.stops) stops · \(route.distance) · \(route.duration)")
                         .font(.system(size: 9, weight: .medium, design: .monospaced))
                         .foregroundStyle(Palette.ink3)
                 }
@@ -875,7 +809,7 @@ private struct SimilarRoutesSheet: View {
                 HStack(spacing: 5) {
                     Image(systemName: "doc.on.doc.fill")
                         .font(.system(size: 9.5, weight: .bold))
-                    Text("套用为我的副本")
+                    Text("Use as my copy")
                         .font(.system(size: 11, weight: .bold))
                 }
                 .foregroundStyle(Palette.ink)

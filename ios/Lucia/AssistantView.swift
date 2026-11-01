@@ -2,8 +2,8 @@ import SwiftUI
 
 struct AssistantView: View {
     @EnvironmentObject private var model: AppModel
-    @Environment(\.dismiss) private var dismiss
     @FocusState private var composerFocused: Bool
+    @State private var missingAnswer = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -18,26 +18,9 @@ struct AssistantView: View {
                         if model.chatThinking {
                             thinkingRow
                         }
-                        if model.chatMessages.count <= 1 {
-                            VStack(spacing: 12) {
-                                ZStack {
-                                    Circle().fill(Palette.limeSoft)
-                                        .frame(width: 64, height: 64)
-                                    Circle().strokeBorder(Palette.ink.opacity(0.35), style: StrokeStyle(lineWidth: 1.2, dash: [4, 4]))
-                                        .frame(width: 64, height: 64)
-                                    Image(systemName: "sparkles")
-                                        .font(.system(size: 23, weight: .semibold))
-                                        .foregroundStyle(Palette.ink.opacity(0.7))
-                                }
-                                Text("Lucia 已读过你的行程、天气\n和 4,208 条社区路线")
-                                    .font(.system(size: 10.5, weight: .medium, design: .monospaced))
-                                    .foregroundStyle(Palette.ink3)
-                                    .multilineTextAlignment(.center)
-                                    .lineSpacing(4)
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding(.top, 22)
-                            .transition(.opacity)
+                        if model.showPlanBuilder {
+                            planBuilder
+                                .transition(.opacity)
                         }
                         Color.clear
                             .frame(height: 1)
@@ -62,9 +45,12 @@ struct AssistantView: View {
                 }
             }
 
-            composer
+            if !model.showPlanBuilder && !model.firstRunFlow {
+                composer
+            }
         }
         .background(Palette.bg.ignoresSafeArea())
+        .interactiveDismissDisabled(model.showPlanBuilder || model.firstRunFlow)
         .onAppear {
             if model.chatMessages.isEmpty {
                 model.seedAssistant()
@@ -72,14 +58,27 @@ struct AssistantView: View {
         }
     }
 
+
+    private func chatText(_ raw: String) -> Text {
+        if let attributed = try? AttributedString(
+            markdown: raw,
+            options: AttributedString.MarkdownParsingOptions(interpretedSyntax: .inlineOnlyPreservingWhitespace)
+        ) {
+            return Text(attributed)
+        }
+        return Text(verbatim: raw)
+    }
+
     // MARK: Header
 
     private var header: some View {
         VStack(spacing: 10) {
-            Capsule()
-                .fill(Palette.line)
-                .frame(width: 36, height: 4)
-                .padding(.top, 8)
+            if !model.showPlanBuilder {
+                Capsule()
+                    .fill(Palette.line)
+                    .frame(width: 36, height: 4)
+                    .padding(.top, 8)
+            }
 
             HStack(spacing: 10) {
                 ZStack {
@@ -92,44 +91,66 @@ struct AssistantView: View {
                 .overlay(Circle().strokeBorder(Palette.ink, lineWidth: 1.2))
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Lucia")
-                        .font(.system(size: 18, weight: .semibold, design: .serif))
+                    HStack(spacing: 6) {
+                        Text("Pico")
+                            .font(.system(size: 18, weight: .semibold, design: .serif))
+                            .foregroundStyle(Palette.ink)
+                        HStack(spacing: 3) {
+                            Circle().fill(Palette.ink).frame(width: 4, height: 4)
+                            Text("Live AI")
+                                .font(.system(size: 7, weight: .heavy, design: .monospaced))
+                                .tracking(0.4)
+                        }
+                        .padding(.horizontal, 6)
+                        .frame(height: 15)
+                        .background(Capsule().fill(Palette.lime))
+                        .overlay(Capsule().strokeBorder(Palette.ink, lineWidth: 1))
                         .foregroundStyle(Palette.ink)
+                    }
                     HStack(spacing: 4) {
                         Circle().fill(Palette.ok).frame(width: 5, height: 5)
-                        Text("正在看 · \(model.assistantContext)")
+                        Text(verbatim: "\(model.say("Looking at")) · \(model.chatDisplay(model.showPlanBuilder ? "New trip · Planning with Pico" : model.assistantContext))")
                             .font(.system(size: 9, weight: .medium, design: .monospaced))
                             .foregroundStyle(Palette.ink3)
                             .lineLimit(1)
+                            .minimumScaleFactor(0.8)
                     }
                 }
                 Spacer()
-                Button {
-                    model.resetChat()
-                } label: {
-                    Image(systemName: "arrow.counterclockwise")
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundStyle(Palette.ink)
-                        .frame(width: 33, height: 33)
-                        .background(Circle().fill(Palette.paper))
-                        .overlay(Circle().strokeBorder(Palette.ink, lineWidth: 1.1))
-                }
-                .buttonStyle(PressableButtonStyle())
 
-                Button {
-                    dismiss()
-                } label: {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 11, weight: .black))
-                        .foregroundStyle(Palette.ink)
-                        .frame(width: 33, height: 33)
-                        .background(Circle().fill(Palette.paper))
-                        .overlay(Circle().strokeBorder(Palette.ink, lineWidth: 1.1))
+                LanguagePill()
+
+                if !model.showPlanBuilder && !model.firstRunFlow {
+                    Button {
+                        model.resetChat()
+                    } label: {
+                        Image(systemName: "arrow.counterclockwise")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundStyle(Palette.ink)
+                            .frame(width: 33, height: 33)
+                            .background(Circle().fill(Palette.paper))
+                            .overlay(Circle().strokeBorder(Palette.ink, lineWidth: 1.1))
+                    }
+                    .buttonStyle(PressableButtonStyle())
+
+                    Button {
+                        Haptics.tap()
+                        model.assistantOpen = false
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 11, weight: .black))
+                            .foregroundStyle(Palette.ink)
+                            .frame(width: 36, height: 36)
+                            .background(Circle().fill(Palette.paper))
+                            .overlay(Circle().strokeBorder(Palette.ink, lineWidth: 1.1))
+                            .contentShape(Circle())
+                    }
+                    .buttonStyle(PressableButtonStyle())
                 }
-                .buttonStyle(PressableButtonStyle())
             }
             .padding(.horizontal, 16)
         }
+        .padding(.top, model.showPlanBuilder ? 8 : 0)
         .padding(.bottom, 10)
         .background(Palette.bg)
         .overlay(alignment: .bottom) {
@@ -153,7 +174,7 @@ struct AssistantView: View {
                     .overlay(Circle().strokeBorder(Palette.ink, lineWidth: 1))
 
                     VStack(alignment: .leading, spacing: 9) {
-                        Text(message.text)
+                        chatText(message.card == .plan ? model.planNarrativeText : model.chatDisplay(message.text))
                             .font(.system(size: 12))
                             .foregroundStyle(Palette.ink2)
                             .lineSpacing(3)
@@ -173,7 +194,7 @@ struct AssistantView: View {
             } else {
                 HStack(alignment: .top, spacing: 8) {
                     Spacer(minLength: 46)
-                    Text(message.text)
+                    Text(verbatim: model.chatDisplay(message.text))
                         .font(.system(size: 12))
                         .foregroundStyle(Palette.paper)
                         .lineSpacing(2)
@@ -201,7 +222,7 @@ struct AssistantView: View {
                 ProgressView()
                     .tint(Palette.ink3)
                     .scaleEffect(0.7)
-                Text("正在整理…")
+                Text("Thinking…")
                     .font(.system(size: 10.5, weight: .medium, design: .monospaced))
                     .foregroundStyle(Palette.ink3)
             }
@@ -229,6 +250,8 @@ struct AssistantView: View {
             routeCard
         case .translate:
             translateCard
+        case .plan:
+            planCard
         }
     }
 
@@ -237,10 +260,10 @@ struct AssistantView: View {
             HStack(spacing: 8) {
                 IconBadge(icon: "building.columns", tint: Palette.accent, background: Palette.accentSoft.opacity(0.6), size: 32)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("故宫博物院")
+                    Text("Forbidden City")
                         .font(.system(size: 11.5, weight: .semibold))
                         .foregroundStyle(Palette.ink)
-                    Text("10/15 09:00 · 成人 ×2")
+                    Text("\(model.tripStamp(0).date) 09:00 · 2 adults")
                         .font(.system(size: 9.5))
                         .foregroundStyle(Palette.ink3)
                 }
@@ -250,15 +273,15 @@ struct AssistantView: View {
                     .foregroundStyle(Palette.ink)
             }
             HStack(spacing: 5) {
-                TagView(text: "余票 812", style: .warn)
-                TagView(text: "实名预约", style: .neutral)
-                TagView(text: "刷身份证入场", style: .soft)
+                TagView(text: "812 left", style: .warn)
+                TagView(text: "ID required", style: .neutral)
+                TagView(text: "Scan ID to enter", style: .soft)
             }
             Button {
                 model.bookForbiddenCity()
-                confirm("已锁定 10/15 09:00 的 2 个成人名额，二维码在「我的 · 订单」里。")
+                confirm("Seats locked for \(model.tripStamp(0).date) 09:00 — 2 adults. Your QR code is in Me · Bookings.")
             } label: {
-                Text("锁定名额")
+                Text("Lock seats")
                     .font(.system(size: 10.5, weight: .semibold))
                     .foregroundStyle(Palette.paper)
                     .frame(maxWidth: .infinity)
@@ -274,16 +297,16 @@ struct AssistantView: View {
 
     private var hotelsCard: some View {
         VStack(alignment: .leading, spacing: 8) {
-            hotelRow(title: "王府井", price: "¥680 起", note: "步行 12 分到故宫", recommended: true)
+            hotelRow(title: "Wangfujing", price: "From ¥680", note: "12 min walk to the Forbidden City", recommended: true)
             SoftDivider()
-            hotelRow(title: "南锣鼓巷", price: "¥520 起", note: "胡同里，夜里安静", recommended: false)
+            hotelRow(title: "Nanluoguxiang", price: "From ¥520", note: "In the hutongs · quiet at night", recommended: false)
             SoftDivider()
-            hotelRow(title: "国贸", price: "¥760 起", note: "地铁直达，适合商务", recommended: false)
+            hotelRow(title: "Guomao", price: "From ¥760", note: "Direct metro · good for business", recommended: false)
             Button {
-                model.addToChecklist(title: "酒店 · 王府井", meta: "10/15–18 · 3 晚 · 含早", category: .docs, phase: .before)
-                confirm("已把「王府井 3 晚」加入行前清单。")
+                model.addToChecklist(title: "Hotel · Wangfujing", meta: "\(model.tripDateRange(count: model.tripDayCount)) · \(max(0, model.tripDayCount - 1)) nights · Breakfast", category: .docs, phase: .before)
+                confirm("Wangfujing, \(max(0, model.tripDayCount - 1)) nights, added to your prep list.")
             } label: {
-                Text("就住王府井")
+                Text("Stay in Wangfujing")
                     .font(.system(size: 10.5, weight: .semibold))
                     .foregroundStyle(Palette.paper)
                     .frame(maxWidth: .infinity)
@@ -319,18 +342,18 @@ struct AssistantView: View {
 
     private var checklistCard: some View {
         VStack(alignment: .leading, spacing: 8) {
-            checkRow(title: "eSIM / 中国手机号", meta: "3 家方案对比 · 从 ¥29 起")
+            checkRow(title: "eSIM / Chinese number", meta: "3 plans compared · From ¥29")
             SoftDivider()
-            checkRow(title: "VPN 安装", meta: "境内应用商店无法下载")
+            checkRow(title: "Install a VPN", meta: "Not on China's app stores")
             SoftDivider()
-            checkRow(title: "故宫门票", meta: "10/15 09:00 · 余票 812")
+            checkRow(title: "Forbidden City tickets", meta: "\(model.tripStamp(0).date) 09:00 · 812 left")
             Button {
-                model.addToChecklist(title: "eSIM / 中国手机号", meta: "3 家方案对比 · 从 ¥29 起", category: .connectivity, phase: .arrival)
-                model.addToChecklist(title: "VPN 安装教程", meta: "出发前装好 · 落地即用", category: .connectivity, phase: .arrival)
-                model.addToChecklist(title: "故宫门票 · 10/15", meta: "成人 ×2 · 实名预约", category: .tickets, phase: .before)
-                confirm("3 项已加入行前清单，可以在「行程」里逐项打勾。")
+                model.addToChecklist(title: "eSIM / Chinese number", meta: "3 plans compared · From ¥29", category: .connectivity, phase: .arrival)
+                model.addToChecklist(title: "Install a VPN", meta: "Set up before you fly · Works on arrival", category: .connectivity, phase: .arrival)
+                model.addToChecklist(title: "Forbidden City tickets · \(model.tripStamp(0).date)", meta: "2 adults · ID booking", category: .tickets, phase: .before)
+                confirm("3 items added to your prep list — tick them off under Trip.")
             } label: {
-                Text("全部加入清单")
+                Text("Add all to list")
                     .font(.system(size: 10.5, weight: .semibold))
                     .foregroundStyle(Palette.paper)
                     .frame(maxWidth: .infinity)
@@ -368,11 +391,11 @@ struct AssistantView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
 
             HStack(spacing: 5) {
-                TagView(text: "少走 1.2 km", style: .accent)
-                TagView(text: "6 站", style: .neutral)
-                TagView(text: "约 5 小时", style: .neutral)
+                TagView(text: "1.2 km less", style: .accent)
+                TagView(text: "6 stops", style: .neutral)
+                TagView(text: "~5 hr", style: .neutral)
             }
-            Text("天安门 → 故宫 → 什刹海 → 景山 → 南锣鼓巷 → 钟鼓楼")
+            Text("Tiananmen Square → Forbidden City → Shichahai → Jingshan → Nanluoguxiang → Drum & Bell Towers")
                 .font(.system(size: 10))
                 .foregroundStyle(Palette.ink2)
                 .lineSpacing(2)
@@ -380,9 +403,9 @@ struct AssistantView: View {
             Button {
                 model.applyRouteSuggestion()
                 model.tab = .plan
-                confirm("已应用新的顺序，路线少走 1.2 km。地图上已经更新。")
+                confirm("New order applied — 1.2 km shorter. The map is updated.")
             } label: {
-                Text("应用调整")
+                Text("Apply changes")
                     .font(.system(size: 10.5, weight: .semibold))
                     .foregroundStyle(Palette.paper)
                     .frame(maxWidth: .infinity)
@@ -412,7 +435,7 @@ struct AssistantView: View {
                     HStack(spacing: 4) {
                         Image(systemName: "speaker.wave.2.fill")
                             .font(.system(size: 9, weight: .semibold))
-                        Text("播放")
+                        Text("Play")
                             .font(.system(size: 10, weight: .medium))
                     }
                     .foregroundStyle(Palette.ink)
@@ -427,9 +450,9 @@ struct AssistantView: View {
                     model.translateMode = .offline
                     model.scenario = .medical
                     model.tab = .translate
-                    dismiss()
+                    model.assistantOpen = false
                 } label: {
-                    Text("打开语句库")
+                    Text("Open phrase pack")
                         .font(.system(size: 10, weight: .semibold))
                         .foregroundStyle(Palette.paper)
                         .frame(maxWidth: .infinity)
@@ -444,29 +467,396 @@ struct AssistantView: View {
         .overlay(RoundedRectangle(cornerRadius: 15, style: .continuous).strokeBorder(Palette.ink.opacity(0.3), lineWidth: 1))
     }
 
+    // MARK: Plan builder
+
+    private let planDayRows: [(day: String, text: String)] = [
+        ("Day 1", "Central Axis · Forbidden City & Jingshan"),
+        ("Day 2", "Great Wall · Badaling by private car"),
+        ("Day 3", "Imperial gardens · Palace & museum"),
+        ("Day 4", "Slow hutongs · departure")
+    ]
+
+    private var planBuilder: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 8) {
+                HStack(spacing: 4) {
+                    Image(systemName: "sparkles")
+                        .font(.system(size: 8, weight: .bold))
+                    Text("TRIP MATCH")
+                        .font(.system(size: 7, weight: .bold, design: .monospaced))
+                        .tracking(0.7)
+                }
+                .foregroundStyle(Palette.ink)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4.5)
+                .background(Capsule().fill(Palette.lime))
+                .overlay(Capsule().strokeBorder(Palette.ink, lineWidth: 1))
+
+                Spacer()
+
+                HStack(spacing: 3) {
+                    ForEach(0..<3, id: \.self) { index in
+                        Circle()
+                            .fill(index < model.quizAnswered ? Palette.lime : Color.clear)
+                            .frame(width: 6, height: 6)
+                            .overlay(
+                                Circle().strokeBorder(
+                                    index < model.quizAnswered ? Palette.ink : Palette.ink.opacity(0.26),
+                                    lineWidth: 1
+                                )
+                            )
+                    }
+                    Text("\(model.quizAnswered)/3")
+                        .font(.system(size: 8, weight: .semibold, design: .monospaced))
+                        .foregroundStyle(Palette.ink3)
+                        .padding(.leading, 2)
+                }
+                .animation(.easeOut(duration: 0.18), value: model.quizAnswered)
+            }
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text("Build your first Beijing trip")
+                    .font(.system(size: 15.5, weight: .black))
+                    .tracking(-0.3)
+                    .foregroundStyle(Palette.ink)
+                Text("Three answers and I'll set the order, the timing and the walking.")
+                    .font(.system(size: 9.5))
+                    .foregroundStyle(Palette.ink3)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            planQuestion(
+                1,
+                "How many days do you like?",
+                options: ["2–3 days", "4–5 days", "6+ days", "Surprise me"],
+                current: model.quizDays
+            ) { value in model.quizDays = value }
+
+            planQuestion(
+                2,
+                "Your kind of holiday",
+                options: ["Slow culture", "Food first", "Outdoors", "Night owl", "Family friendly", "Budget smart"],
+                current: model.quizStyle
+            ) { value in model.quizStyle = value }
+
+            planQuestion(
+                3,
+                "A theme, or none?",
+                options: ["Imperial history", "Hutongs & coffee", "Art & design", "Nature & parks", "Night markets", "No theme"],
+                current: model.quizTheme
+            ) { value in model.quizTheme = value }
+
+            QuizNoteBox(text: $model.quizNote)
+
+            Button {
+                guard model.quizPersona != nil else {
+                    Haptics.tap()
+                    withAnimation(.easeOut(duration: 0.2)) { missingAnswer = true }
+                    return
+                }
+                missingAnswer = false
+                composerFocused = false
+                model.buildPlan()
+            } label: {
+                HStack(spacing: 7) {
+                    Image(systemName: "sparkles")
+                        .font(.system(size: 11, weight: .bold))
+                    Text("Generate plan")
+                        .font(.system(size: 12, weight: .black))
+                    Image(systemName: "arrow.right")
+                        .font(.system(size: 10, weight: .black))
+                }
+                .foregroundStyle(Palette.ink)
+                .frame(maxWidth: .infinity)
+                .frame(height: 44)
+                .background(Capsule().fill(Palette.lime))
+                .overlay(Capsule().strokeBorder(Palette.ink, lineWidth: 1.2))
+                .compositingGroup()
+                .shadow(color: Palette.ink.opacity(0.9), radius: 0, x: 0, y: 3)
+            }
+            .buttonStyle(PressableButtonStyle())
+            .accessibilityLabel("Generate plan")
+
+            HStack(alignment: .top, spacing: 5) {
+                Image(systemName: missingAnswer ? "exclamationmark.circle" : "info.circle")
+                    .font(.system(size: 9, weight: .bold))
+                Text(missingAnswer
+                     ? "Pick one per question to generate."
+                     : (model.quizAnswered == 3 ? "All set — tap Generate plan." : "Pick one per question — you can change it later."))
+                    .font(.system(size: 8.5, weight: .medium))
+                    .lineSpacing(1.5)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .foregroundStyle(missingAnswer ? Palette.warn : Palette.ink3)
+        }
+        .padding(13)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Palette.paper))
+        .overlay(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .strokeBorder(Palette.ink, lineWidth: 1.2)
+        )
+        .compositingGroup()
+        .shadow(color: Palette.ink.opacity(0.1), radius: 0, x: 0, y: 2.5)
+    }
+
+    private func planQuestion(
+        _ number: Int,
+        _ label: String,
+        options: [String],
+        current: String?,
+        select: @escaping (String) -> Void
+    ) -> some View {
+        let done = current != nil
+        return VStack(alignment: .leading, spacing: 7) {
+            HStack(spacing: 6) {
+                Text("\(number)")
+                    .font(.system(size: 7.5, weight: .bold, design: .monospaced))
+                    .foregroundStyle(done ? Palette.ink : Palette.ink3)
+                    .frame(width: 17, height: 17)
+                    .background(Circle().fill(done ? Palette.lime : Color.clear))
+                    .overlay(
+                        Circle().strokeBorder(
+                            done ? Palette.ink : Palette.ink.opacity(0.24),
+                            lineWidth: 1
+                        )
+                    )
+
+                Text(LocalizedStringKey(label))
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundStyle(Palette.ink)
+
+                Spacer(minLength: 0)
+
+                if done {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 7, weight: .black))
+                        .foregroundStyle(Palette.ink)
+                        .frame(width: 15, height: 15)
+                        .background(Circle().fill(Palette.lime))
+                        .overlay(Circle().strokeBorder(Palette.ink, lineWidth: 1))
+                        .transition(.scale.combined(with: .opacity))
+                }
+            }
+            LazyVGrid(
+                columns: Array(
+                    repeating: GridItem(.flexible(), spacing: 5),
+                    count: options.count <= 4 ? 2 : 3
+                ),
+                spacing: 5
+            ) {
+                ForEach(options, id: \.self) { option in
+                    let on = current == option
+                    Button {
+                        Haptics.tap()
+                        withAnimation(.easeOut(duration: 0.16)) {
+                            missingAnswer = false
+                            select(option)
+                        }
+                    } label: {
+                        Text(LocalizedStringKey(option))
+                            .font(.system(size: 9.5, weight: .bold))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.66)
+                            .padding(.horizontal, 6)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 29)
+                            .background(Capsule().fill(on ? Palette.ink : Palette.paper))
+                            .foregroundStyle(on ? Palette.paper : Palette.ink2)
+                            .overlay(
+                                Capsule().strokeBorder(on ? Palette.ink : Palette.ink.opacity(0.3), lineWidth: 1)
+                            )
+                    }
+                    .buttonStyle(PressableButtonStyle(scale: 0.96))
+                    .accessibilityLabel("\(label): \(option)")
+                    .accessibilityAddTraits(on ? .isSelected : [])
+                }
+            }
+        }
+        .padding(.horizontal, 9)
+        .padding(.vertical, 9)
+        .background(
+            RoundedRectangle(cornerRadius: 13, style: .continuous)
+                .fill(Palette.paperWarm)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 13, style: .continuous)
+                .strokeBorder(done ? Palette.ink.opacity(0.4) : Palette.ink.opacity(0.13), lineWidth: 1)
+        )
+        .animation(.easeOut(duration: 0.2), value: done)
+    }
+
+    private var planCard: some View {
+        VStack(alignment: .leading, spacing: 9) {
+            HStack(spacing: 8) {
+                HStack(spacing: 4) {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 7, weight: .black))
+                    Text("PLAN READY")
+                        .font(.system(size: 7, weight: .bold, design: .monospaced))
+                        .tracking(0.7)
+                }
+                .foregroundStyle(Palette.ink)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4.5)
+                .background(Capsule().fill(Palette.lime))
+                .overlay(Capsule().strokeBorder(Palette.ink, lineWidth: 1))
+
+                Spacer()
+
+                Text(verbatim: "\(model.planLength) \(model.say("days"))")
+                    .font(.system(size: 8, weight: .semibold, design: .monospaced))
+                    .foregroundStyle(Palette.ink3)
+            }
+
+            if let persona = model.quizPersona {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(LocalizedStringKey(persona.title))
+                        .font(.system(size: 15, weight: .black))
+                        .tracking(-0.3)
+                        .foregroundStyle(Palette.ink)
+                    Text(verbatim: model.tripMeta(persona.meta))
+                        .font(.system(size: 8, weight: .semibold, design: .monospaced))
+                        .foregroundStyle(Palette.ink3)
+                }
+                if !persona.note.isEmpty {
+                    HStack(alignment: .top, spacing: 5) {
+                        Image(systemName: "text.bubble")
+                            .font(.system(size: 8, weight: .bold))
+                        Text(verbatim: "“\(persona.note)”")
+                            .font(.system(size: 9, weight: .medium))
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .foregroundStyle(Palette.ink2)
+                    .padding(.horizontal, 7)
+                    .padding(.vertical, 5)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8, style: .continuous)
+                            .fill(Palette.lime.opacity(0.22))
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8, style: .continuous)
+                            .strokeBorder(Palette.ink.opacity(0.22), style: StrokeStyle(lineWidth: 1, dash: [3, 2]))
+                    )
+                }
+            }
+
+            HStack(spacing: 0) {
+                planStat("\(model.planLength)", "days")
+                statDivider
+                planStat("\(model.planLength * 4)", "stops")
+                statDivider
+                planStat(String(format: "%.1f", Double(model.planLength) * 4.6), "km walking")
+            }
+            .padding(.vertical, 7)
+            .overlay(alignment: .top) {
+                Rectangle().fill(Palette.ink.opacity(0.2)).frame(height: 1)
+            }
+            .overlay(alignment: .bottom) {
+                Rectangle().fill(Palette.ink.opacity(0.2)).frame(height: 1)
+            }
+
+            VStack(spacing: 0) {
+                ForEach(Array(planDayRows.prefix(min(model.planLength, 4)).enumerated()), id: \.offset) { index, row in
+                    HStack(alignment: .firstTextBaseline, spacing: 7) {
+                        Text(verbatim: model.say(row.day))
+                            .font(.system(size: 7.5, weight: .bold, design: .monospaced))
+                            .foregroundStyle(Palette.ink3)
+                            .frame(width: 32, alignment: .leading)
+                        Text(verbatim: model.say(row.text))
+                            .font(.system(size: 9.5, weight: .medium))
+                            .foregroundStyle(Palette.ink2)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Spacer(minLength: 0)
+                    }
+                    .padding(.vertical, 4)
+                    .overlay(alignment: .top) {
+                        if index > 0 {
+                            Rectangle().fill(Palette.ink.opacity(0.1)).frame(height: 1)
+                        }
+                    }
+                }
+            }
+
+            if model.planLength > 4 {
+                Text(verbatim: model.lang == .zh
+                     ? "还有 \(model.planLength - 4) 天，已存进行程"
+                     : "+ \(model.planLength - 4) more days, saved to your trip")
+                    .font(.system(size: 8, weight: .medium))
+                    .foregroundStyle(Palette.ink3)
+                    .padding(.top, 3)
+            }
+
+            Button {
+                Haptics.success()
+                model.tab = .trip
+                model.assistantOpen = false
+            } label: {
+                HStack(spacing: 5) {
+                    Image(systemName: "map")
+                        .font(.system(size: 9, weight: .bold))
+                    Text("View my trip")
+                        .font(.system(size: 10, weight: .bold))
+                    Image(systemName: "arrow.right")
+                        .font(.system(size: 9, weight: .black))
+                }
+                .foregroundStyle(Palette.paper)
+                .frame(maxWidth: .infinity)
+                .frame(height: 33)
+                .background(Capsule().fill(Palette.ink))
+            }
+            .buttonStyle(PressableButtonStyle())
+        }
+    }
+
+    private func planStat(_ value: String, _ label: String) -> some View {
+        VStack(alignment: .leading, spacing: 1) {
+            Text(value)
+                .font(.system(size: 13, weight: .black))
+                .tracking(-0.3)
+                .foregroundStyle(Palette.ink)
+            Text(verbatim: model.say(label))
+                .font(.system(size: 7, weight: .semibold))
+                .foregroundStyle(Palette.ink3)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.leading, 8)
+    }
+
+    private var statDivider: some View {
+        Rectangle()
+            .fill(Palette.ink.opacity(0.18))
+            .frame(width: 1, height: 26)
+    }
+
     // MARK: Composer
 
     private var composer: some View {
         VStack(spacing: 9) {
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 6) {
-                    ForEach(model.quickPrompts, id: \.self) { prompt in
-                        Button {
-                            composerFocused = false
-                            model.sendChat(prompt)
-                        } label: {
-                            Text(prompt)
-                                .font(.system(size: 10, weight: .semibold))
-                                .foregroundStyle(Palette.ink)
-                                .padding(.horizontal, 11)
-                                .frame(height: 30)
-                                .background(Capsule().fill(Palette.paper))
-                                .overlay(Capsule().strokeBorder(Palette.ink.opacity(0.65), lineWidth: 1))
+            if !model.showPlanBuilder {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 6) {
+                        ForEach(model.quickPrompts, id: \.self) { prompt in
+                            Button {
+                                composerFocused = false
+                                model.sendChat(prompt)
+                            } label: {
+                                Text(verbatim: model.say(prompt))
+                                    .font(.system(size: 10, weight: .semibold))
+                                    .foregroundStyle(Palette.ink)
+                                    .padding(.horizontal, 11)
+                                    .frame(height: 30)
+                                    .background(Capsule().fill(Palette.paper))
+                                    .overlay(Capsule().strokeBorder(Palette.ink.opacity(0.65), lineWidth: 1))
+                            }
+                            .buttonStyle(PressableButtonStyle(scale: 0.96))
                         }
-                        .buttonStyle(PressableButtonStyle(scale: 0.96))
                     }
+                    .padding(.horizontal, 16)
                 }
-                .padding(.horizontal, 16)
             }
 
             HStack(spacing: 8) {
@@ -474,7 +864,7 @@ struct AssistantView: View {
                     Image(systemName: "sparkles")
                         .font(.system(size: 11, weight: .bold))
                         .foregroundStyle(Palette.ink2)
-                    TextField("问 Lucia，比如「明早有早餐店吗」", text: $model.chatDraft)
+                    TextField("Ask Pico, e.g. “Any breakfast spots nearby?”", text: $model.chatDraft)
                         .font(.system(size: 12))
                         .textFieldStyle(.plain)
                         .focused($composerFocused)

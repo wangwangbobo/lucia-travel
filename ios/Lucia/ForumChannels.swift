@@ -69,7 +69,7 @@ struct ChannelHeader: View {
                     HStack(spacing: 4) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 9, weight: .black))
-                        Text("社区")
+                        Text("Community")
                             .font(.system(size: 10, weight: .bold))
                     }
                     .foregroundStyle(Palette.ink)
@@ -136,18 +136,18 @@ private struct RestaurantChannel: View {
             .sorted { $0.heat > $1.heat }
     }
 
-    private let authors = ["Lina", "周", "Ken"]
+    private let authors = ["Lina", "Zhou", "Ken"]
 
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(alignment: .leading, spacing: 16) {
                 ChannelHeader(
-                    eyebrow: "社区 / EAT",
+                    eyebrow: "COMMUNITY / EAT",
                     sticker: "EAT",
-                    title: "好吃，是北京的第一印象",
-                    subtitle: "本周热度榜 · 基于 4,208 次收藏与到店打卡",
+                    title: "Taste is Beijing's first impression",
+                    subtitle: "This week's heat · From 4,208 saves and check-ins",
                     fill: Palette.mustard,
-                    actionTitle: "分享",
+                    actionTitle: "Share",
                     actionIcon: "square.and.pencil",
                     action: { showCompose = true }
                 )
@@ -170,7 +170,7 @@ private struct RestaurantChannel: View {
                 .presentationBackground(Palette.bg)
         }
         .sheet(isPresented: $showCompose) {
-            ComposePost(initialTag: "餐厅")
+            ComposePost(initialTag: "Food")
                 .environmentObject(model)
                 .presentationDetents([.large])
                 .presentationCornerRadius(30)
@@ -181,9 +181,9 @@ private struct RestaurantChannel: View {
     private var rankingCard: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack {
-                Eyebrow(text: "热度榜 / THIS WEEK")
+                Eyebrow(text: "HEAT CHART / THIS WEEK")
                 Spacer()
-                Text("每 2 小时更新")
+                Text("Updated every 2 hr")
                     .font(.system(size: 8, weight: .medium, design: .monospaced))
                     .foregroundStyle(Palette.ink3)
             }
@@ -217,7 +217,7 @@ private struct RestaurantChannel: View {
                                     .foregroundStyle(Palette.ink)
                                     .lineLimit(1)
                                 if index == 0 {
-                                    TagView(text: "本周最热", style: .accent)
+                                    TagView(text: "Hottest", style: .accent)
                                 }
                             }
                             Text("\(place.area) · \(place.price)")
@@ -266,11 +266,11 @@ private struct RestaurantChannel: View {
     private var communityShares: some View {
         VStack(alignment: .leading, spacing: 9) {
             HStack {
-                Text("最新分享")
+                Text("Latest shares")
                     .font(.system(size: 17, weight: .heavy))
                     .foregroundStyle(Palette.ink)
                 Spacer()
-                Text("来自到店打卡")
+                Text("From check-ins")
                     .font(.system(size: 8.5, weight: .medium, design: .monospaced))
                     .foregroundStyle(Palette.ink3)
             }
@@ -305,7 +305,7 @@ private struct RestaurantChannel: View {
                     .font(.system(size: 9.5, weight: .semibold))
                     .foregroundStyle(Palette.ink)
                 Spacer(minLength: 0)
-                TagView(text: "已到店", style: .ok)
+                TagView(text: "Checked in", style: .ok)
             }
 
             Text("“\(place.note)”")
@@ -345,7 +345,7 @@ private struct RestaurantChannel: View {
             HStack(spacing: 6) {
                 Image(systemName: "plus.bubble.fill")
                     .font(.system(size: 10, weight: .bold))
-                Text("分享一家我的私藏餐厅")
+                Text("Share a favorite restaurant")
                     .font(.system(size: 11, weight: .bold))
             }
             .foregroundStyle(Palette.ink)
@@ -366,10 +366,10 @@ private struct RestaurantChannel: View {
                 .background(Circle().fill(Palette.mint))
                 .overlay(Circle().strokeBorder(Palette.ink, lineWidth: 1))
             VStack(alignment: .leading, spacing: 2) {
-                Text("错峰比排队更划算")
+                Text("Off-peak beats queuing")
                     .font(.system(size: 11, weight: .bold))
                     .foregroundStyle(Palette.ink)
-                Text("四季民福 15:00 后、满恒记 17:00 前取号，等待时间最短。")
+                Text("Take a number at Siji Minfu after 15:00, or Man Heng Ji before 17:00 — shortest waits.")
                     .font(.system(size: 9, weight: .medium))
                     .foregroundStyle(Palette.ink2)
                     .lineSpacing(2)
@@ -387,13 +387,13 @@ private struct RestaurantChannel: View {
 private struct SpotChannel: View {
     @EnvironmentObject private var model: AppModel
     @State private var selectedPlace: ForumPlace?
-    @State private var mood = "全部"
+    @State private var mood = "All"
 
-    private let moods = ["全部", "日落", "人少", "亲子", "建筑", "划船"]
+    private let moods = ["All", "Sunset", "Quiet", "Family", "Architecture", "Boating"]
 
     private var spots: [ForumPlace] {
         let list = model.forumPlaces.filter { $0.kind == .spot }
-        guard mood != "全部" else { return list }
+        guard mood != "All" else { return list }
         return list.filter { $0.tags.contains(mood) }
     }
 
@@ -401,10 +401,10 @@ private struct SpotChannel: View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(alignment: .leading, spacing: 15) {
                 ChannelHeader(
-                    eyebrow: "社区 / SEE",
+                    eyebrow: "COMMUNITY / SEE",
                     sticker: "SEE",
-                    title: "去哪儿看北京",
-                    subtitle: "按日落、人少、亲子和建筑挑一个 · 本周 3 处",
+                    title: "Where to see Beijing",
+                    subtitle: "Pick by sunset, quiet, family or architecture · 3 this week",
                     fill: Palette.mint
                 )
 
@@ -420,7 +420,7 @@ private struct SpotChannel: View {
                 }
 
                 if spots.isEmpty {
-                    Text("这个主题下还没有推荐，换个筛选试试。")
+                    Text("No picks under this theme yet — try another filter.")
                         .font(.system(size: 11, weight: .medium))
                         .foregroundStyle(Palette.ink3)
                         .padding(.vertical, 16)
@@ -466,7 +466,7 @@ private struct SpotChannel: View {
                     .frame(height: 122)
                     .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                     .overlay(alignment: .bottomLeading) {
-                        Text("最佳 · \(place.bestTime)")
+                        Text("Best · \(place.bestTime)")
                             .font(.system(size: 7.5, weight: .bold, design: .monospaced))
                             .foregroundStyle(Palette.paper)
                             .padding(.horizontal, 7)
@@ -498,7 +498,7 @@ private struct SpotChannel: View {
                 .font(.system(size: 8.5, weight: .medium, design: .monospaced))
                 .foregroundStyle(Palette.ink3)
             HStack(spacing: 4) {
-                TagView(text: place.tags.first ?? "推荐", style: .soft)
+                TagView(text: place.tags.first ?? "Pick", style: .soft)
                 Spacer(minLength: 0)
                 Text(place.price)
                     .font(.system(size: 9.5, weight: .black))
@@ -526,15 +526,15 @@ private struct SpotChannel: View {
                 .background(Circle().fill(Palette.mustard))
                 .overlay(Circle().strokeBorder(Palette.ink, lineWidth: 1.1))
             VStack(alignment: .leading, spacing: 2) {
-                Text("本周日落 17:18")
+                Text("Sunset this week 17:18")
                     .font(.system(size: 12.5, weight: .bold))
                     .foregroundStyle(Palette.ink)
-                Text("景山万春亭 16:40 前到，能占到东侧的位置。")
+                Text("Reach Jingshan's Wanchun Pavilion by 16:40 to claim a spot on the east side.")
                     .font(.system(size: 9.5, weight: .medium))
                     .foregroundStyle(Palette.ink2)
             }
             Spacer(minLength: 0)
-            TagView(text: "90 分钟最佳", style: .warn)
+            TagView(text: "Best 90 min", style: .warn)
         }
         .padding(12)
         .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Palette.mustardSoft))
@@ -550,10 +550,10 @@ private struct SpotChannel: View {
                 .background(Circle().fill(Palette.lime))
                 .overlay(Circle().strokeBorder(Palette.ink, lineWidth: 1))
             VStack(alignment: .leading, spacing: 2) {
-                Text("想把 3 个景点排进一天？")
+                Text("Fit 3 sights into one day?")
                     .font(.system(size: 11.5, weight: .bold))
                     .foregroundStyle(Palette.ink)
-                Text("Lucia 会按日落、闭馆日和通勤时间帮你排。")
+                Text("Pico plans around sunset, closing days and transit.")
                     .font(.system(size: 9.5, weight: .medium))
                     .foregroundStyle(Palette.ink2)
             }
@@ -567,7 +567,7 @@ private struct SpotChannel: View {
         .dashedBorder(color: Palette.ink.opacity(0.5), radius: 17)
         .contentShape(Rectangle())
         .onTapGesture {
-            model.openAssistant("论坛 · 景点推荐")
+            model.openAssistant("Community · Sight picks")
         }
     }
 }
@@ -587,12 +587,12 @@ private struct GiftChannel: View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(alignment: .leading, spacing: 15) {
                 ChannelHeader(
-                    eyebrow: "社区 / TAKE HOME",
+                    eyebrow: "COMMUNITY / TAKE HOME",
                     sticker: "GIFT",
-                    title: "带得走的北京",
-                    subtitle: "本地人买的那几样 · 可托运、不占箱",
+                    title: "Beijing to take home",
+                    subtitle: "What locals buy · Check-in friendly, packs flat",
                     fill: Palette.pink,
-                    actionTitle: "分享",
+                    actionTitle: "Share",
                     actionIcon: "square.and.pencil",
                     action: { showCompose = true }
                 )
@@ -601,11 +601,11 @@ private struct GiftChannel: View {
 
                 VStack(alignment: .leading, spacing: 9) {
                     HStack {
-                        Text("本地人推荐")
+                        Text("Local picks")
                             .font(.system(size: 17, weight: .heavy))
                             .foregroundStyle(Palette.ink)
                         Spacer()
-                        Text("\(gifts.count) 件 · 按收藏排序")
+                        Text("\(gifts.count) items · Most saved")
                             .font(.system(size: 8.5, weight: .medium, design: .monospaced))
                             .foregroundStyle(Palette.ink3)
                     }
@@ -631,7 +631,7 @@ private struct GiftChannel: View {
                 .presentationBackground(Palette.bg)
         }
         .sheet(isPresented: $showCompose) {
-            ComposePost(initialTag: "伴手礼")
+            ComposePost(initialTag: "Gifts")
                 .environmentObject(model)
                 .presentationDetents([.large])
                 .presentationCornerRadius(30)
@@ -645,11 +645,11 @@ private struct GiftChannel: View {
                 HStack(spacing: 4) {
                     Image(systemName: "checkmark.seal.fill")
                         .font(.system(size: 9, weight: .bold))
-                    Text("本地人买")
+                    Text("Locals buy")
                         .font(.system(size: 11, weight: .bold))
                 }
                 .foregroundStyle(Palette.ink)
-                Text("散装点心\n酸梅汤原料\n角楼冰箱贴")
+                Text("Loose pastries\nSour plum drink mix\nCorner tower magnets")
                     .font(.system(size: 9.5, weight: .medium))
                     .foregroundStyle(Palette.ink2)
                     .lineSpacing(3)
@@ -665,11 +665,11 @@ private struct GiftChannel: View {
                 HStack(spacing: 4) {
                     Image(systemName: "xmark.circle.fill")
                         .font(.system(size: 9, weight: .bold))
-                    Text("游客款")
+                    Text("Tourist versions")
                         .font(.system(size: 11, weight: .bold))
                 }
                 .foregroundStyle(Palette.ink)
-                Text("过度包装礼盒\n景区钥匙扣\n袋装烤鸭")
+                Text("Over-boxed gift sets\nSouvenir keychains\nBagged roast duck")
                     .font(.system(size: 9.5, weight: .medium))
                     .foregroundStyle(Palette.ink3)
                     .strikethrough(true, color: Palette.ink3.opacity(0.6))
@@ -682,7 +682,7 @@ private struct GiftChannel: View {
         .background(RoundedRectangle(cornerRadius: 19, style: .continuous).fill(Palette.pinkSoft))
         .overlay(RoundedRectangle(cornerRadius: 19, style: .continuous).strokeBorder(Palette.ink, lineWidth: 1.2))
         .overlay(alignment: .topLeading) {
-            StickerLabel(text: "买得对", fill: Palette.paper, rotation: -4)
+            StickerLabel(text: "Buy right", fill: Palette.paper, rotation: -4)
                 .offset(x: 12, y: -11)
         }
         .padding(.top, 8)
@@ -750,18 +750,18 @@ private struct GiftChannel: View {
             for gift in gifts.prefix(3) {
                 model.addToChecklist(
                     title: gift.title,
-                    meta: "\(gift.price) · 伴手礼",
+                    meta: "\(gift.price) · Gift",
                     category: .docs,
                     phase: .arrival
                 )
             }
             Haptics.success()
-            model.toast("已把 3 件伴手礼加入行前清单", icon: "checklist")
+            model.toast("3 gifts added to your prep list", icon: "checklist")
         } label: {
             HStack(spacing: 6) {
                 Image(systemName: "shippingbox.fill")
                     .font(.system(size: 10, weight: .bold))
-                Text("把推荐加入行前清单")
+                Text("Add picks to prep list")
                     .font(.system(size: 11, weight: .bold))
             }
             .foregroundStyle(Palette.ink)
@@ -778,7 +778,7 @@ private struct GiftChannel: View {
             Image(systemName: "airplane")
                 .font(.system(size: 11, weight: .bold))
                 .foregroundStyle(Palette.ink)
-            Text("可托运提示：点心选真空包装，酸梅汤原料和酱菜放托运箱；冰箱贴随身带着更安全。")
+            Text("Packing tip: choose vacuum-sealed pastries; put sour plum mix and pickles in checked bags. Keep magnets with you.")
                 .font(.system(size: 9.5, weight: .medium))
                 .foregroundStyle(Palette.ink2)
                 .lineSpacing(3)
@@ -802,12 +802,12 @@ private struct RouteChannel: View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(alignment: .leading, spacing: 15) {
                 ChannelHeader(
-                    eyebrow: "社区 / WALK",
+                    eyebrow: "COMMUNITY / WALK",
                     sticker: "WALK",
-                    title: "跟着别人走一遍",
-                    subtitle: "社区 citywalk · 可套用成自己的副本",
+                    title: "Walk someone else's route",
+                    subtitle: "Community citywalks · Apply as your own copy",
                     fill: Palette.periwinkle,
-                    actionTitle: "分享",
+                    actionTitle: "Share",
                     actionIcon: "square.and.pencil",
                     action: { showCompose = true }
                 )
@@ -816,11 +816,11 @@ private struct RouteChannel: View {
 
                 VStack(alignment: .leading, spacing: 9) {
                     HStack {
-                        Text("社区路线")
+                        Text("Community routes")
                             .font(.system(size: 17, weight: .heavy))
                             .foregroundStyle(Palette.ink)
                         Spacer()
-                        Text("\(model.forumRoutes.count) 条 · 本周新增 1 条")
+                        Text("\(model.forumRoutes.count) routes · 1 new this week")
                             .font(.system(size: 8.5, weight: .medium, design: .monospaced))
                             .foregroundStyle(Palette.ink3)
                     }
@@ -837,7 +837,7 @@ private struct RouteChannel: View {
             .padding(.bottom, 140)
         }
         .sheet(isPresented: $showCompose) {
-            ComposePost(initialTag: "路线", initialAttachRoute: true)
+            ComposePost(initialTag: "Routes", initialAttachRoute: true)
                 .environmentObject(model)
                 .presentationDetents([.large])
                 .presentationCornerRadius(30)
@@ -848,9 +848,9 @@ private struct RouteChannel: View {
     private var myRouteCard: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Eyebrow(text: "我的路线 / DRAFT", color: Palette.lime)
+                Eyebrow(text: "MY ROUTE / DRAFT", color: Palette.lime)
                 Spacer()
-                TagView(text: "\(model.stops.count) 站", style: .dark)
+                TagView(text: "\(model.stops.count) stops", style: .dark)
             }
             Text(model.routeName)
                 .font(.system(size: 21, weight: .black))
@@ -858,7 +858,7 @@ private struct RouteChannel: View {
                 .foregroundStyle(Palette.paper)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
-            Text("4.2 km · 约 5 小时 · 步行 + 地铁")
+            Text("4.2 km · ~5 hr · Walk + subway")
                 .font(.system(size: 9, weight: .medium, design: .monospaced))
                 .foregroundStyle(Palette.paper.opacity(0.6))
 
@@ -870,7 +870,7 @@ private struct RouteChannel: View {
                     HStack(spacing: 4) {
                         Image(systemName: "map.fill")
                             .font(.system(size: 8.5, weight: .bold))
-                        Text("回到地图")
+                        Text("Back to map")
                             .font(.system(size: 10, weight: .bold))
                     }
                     .foregroundStyle(Palette.ink)
@@ -887,7 +887,7 @@ private struct RouteChannel: View {
                     HStack(spacing: 4) {
                         Image(systemName: "square.and.arrow.up")
                             .font(.system(size: 8.5, weight: .bold))
-                        Text("分享给我朋友")
+                        Text("Share with a friend")
                             .font(.system(size: 10, weight: .bold))
                     }
                     .foregroundStyle(Palette.paper)
@@ -948,7 +948,7 @@ private struct RouteChannel: View {
                     TagView(text: tag, style: .soft)
                 }
                 Spacer(minLength: 0)
-                Text("\(route.stops) 站 · \(route.distance)")
+                Text("\(route.stops) stops · \(route.distance)")
                     .font(.system(size: 8.5, weight: .medium, design: .monospaced))
                     .foregroundStyle(Palette.ink3)
             }
@@ -959,7 +959,7 @@ private struct RouteChannel: View {
                 HStack(spacing: 4) {
                     Image(systemName: "doc.on.doc.fill")
                         .font(.system(size: 9, weight: .bold))
-                    Text("套用到我的路线")
+                    Text("Apply to my route")
                         .font(.system(size: 10.5, weight: .bold))
                 }
                 .foregroundStyle(Palette.ink)
@@ -997,9 +997,9 @@ private struct RouteChannel: View {
                 Image(systemName: "figure.walk.motion")
                     .font(.system(size: 13, weight: .bold))
                 VStack(alignment: .leading, spacing: 1) {
-                    Text("分享你的 citywalk")
+                    Text("Share your citywalk")
                         .font(.system(size: 11.5, weight: .bold))
-                    Text("关联当前路线，朋友可以一键套用")
+                    Text("Link your route — friends can apply it in one tap")
                         .font(.system(size: 9, weight: .medium))
                         .opacity(0.68)
                 }
@@ -1028,12 +1028,12 @@ private struct EventChannel: View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(alignment: .leading, spacing: 15) {
                 ChannelHeader(
-                    eyebrow: "社区 / EVENTS",
+                    eyebrow: "COMMUNITY / EVENTS",
                     sticker: "EVENTS",
-                    title: "这周在北京见面",
-                    subtitle: "本地摊主、旧物市集和夜骑 · \(model.localEvents.count) 场",
+                    title: "Meet in Beijing this week",
+                    subtitle: "Local stalls, flea markets and night rides · \(model.localEvents.count) events",
                     fill: Palette.accentSoft,
-                    actionTitle: "发布",
+                    actionTitle: "Post",
                     actionIcon: "plus",
                     action: { showCompose = true }
                 )
@@ -1044,11 +1044,11 @@ private struct EventChannel: View {
 
                 VStack(alignment: .leading, spacing: 9) {
                     HStack {
-                        Text("活动日历")
+                        Text("Event calendar")
                             .font(.system(size: 17, weight: .heavy))
                             .foregroundStyle(Palette.ink)
                         Spacer()
-                        Text("按时间排序")
+                        Text("By time")
                             .font(.system(size: 8.5, weight: .medium, design: .monospaced))
                             .foregroundStyle(Palette.ink3)
                     }
@@ -1089,7 +1089,7 @@ private struct EventChannel: View {
         return ZStack(alignment: .topTrailing) {
             VStack(alignment: .leading, spacing: 9) {
                 HStack {
-                    TagView(text: "本周精选", style: .neutral)
+                    TagView(text: "Featured this week", style: .neutral)
                     Spacer()
                     Text("\(event.date) · \(event.time)")
                         .font(.system(size: 9, weight: .bold, design: .monospaced))
@@ -1105,8 +1105,8 @@ private struct EventChannel: View {
                     .foregroundStyle(Palette.ink.opacity(0.68))
                     .lineSpacing(2)
                 HStack(spacing: 8) {
-                    AvatarStack(names: ["林", "周", "K"], size: 21)
-                    Text("\(event.attendees + (joined ? 1 : 0)) 人已报名")
+                    AvatarStack(names: ["L", "Z", "K"], size: 21)
+                    Text("\(event.attendees + (joined ? 1 : 0)) going")
                         .font(.system(size: 9, weight: .semibold))
                         .foregroundStyle(Palette.ink.opacity(0.65))
                     Spacer()
@@ -1116,7 +1116,7 @@ private struct EventChannel: View {
                         HStack(spacing: 4) {
                             Image(systemName: joined ? "checkmark" : "plus")
                                 .font(.system(size: 8.5, weight: .black))
-                            Text(joined ? "已报名" : "报名")
+                            Text(joined ? "Going" : "Join")
                                 .font(.system(size: 10, weight: .bold))
                         }
                         .foregroundStyle(Palette.ink)
@@ -1177,14 +1177,14 @@ private struct EventChannel: View {
                         .foregroundStyle(Palette.ink)
                         .lineLimit(1)
                     if event.isMine {
-                        TagView(text: "我发布", style: .accent)
+                        TagView(text: "My post", style: .accent)
                     }
                 }
                 Text("\(event.time) · \(event.place)")
                     .font(.system(size: 8.5, weight: .medium, design: .monospaced))
                     .foregroundStyle(Palette.ink3)
                     .lineLimit(1)
-                Text("\(event.host) · \(event.fee) · \(event.attendees + (joined ? 1 : 0)) 人")
+                Text("\(event.host) · \(event.fee) · \(event.attendees + (joined ? 1 : 0)) going")
                     .font(.system(size: 8.5, weight: .medium))
                     .foregroundStyle(Palette.ink2)
                     .lineLimit(1)
@@ -1195,7 +1195,7 @@ private struct EventChannel: View {
             Button {
                 model.toggleJoin(event)
             } label: {
-                Text(joined ? "已报名" : "报名")
+                Text(joined ? "Going" : "Join")
                     .font(.system(size: 9.5, weight: .bold))
                     .foregroundStyle(Palette.ink)
                     .padding(.horizontal, 11)
@@ -1218,7 +1218,7 @@ private struct EventChannel: View {
             HStack(spacing: 7) {
                 Image(systemName: "calendar.badge.plus")
                     .font(.system(size: 12, weight: .bold))
-                Text("发起一场本地活动")
+                Text("Host a local event")
                     .font(.system(size: 11.5, weight: .bold))
                 Spacer()
                 Image(systemName: "arrow.right")
@@ -1252,10 +1252,10 @@ private struct EventComposeSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var title = ""
-    @State private var date = "11/08 周六"
+    @State private var date = "11/08 Sat"
     @State private var time = "18:00"
     @State private var place = ""
-    @State private var fee = "免费"
+    @State private var fee = "Free"
     @State private var note = ""
 
     private var canPublish: Bool {
@@ -1268,13 +1268,13 @@ private struct EventComposeSheet: View {
             VStack(alignment: .leading, spacing: 15) {
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 4) {
-                        Eyebrow(text: "社区 · 发起活动")
-                        Text("把有意思的事\n约在北京")
+                        Eyebrow(text: "COMMUNITY · HOST AN EVENT")
+                        Text("Bring something good\nto Beijing")
                             .font(.system(size: 28, weight: .black))
                             .tracking(-0.5)
                             .foregroundStyle(Palette.ink)
                             .lineSpacing(1)
-                        Text("发布后会出现在本地活动频道，可随时编辑。")
+                        Text("It appears in the local events channel — editable anytime.")
                             .font(.system(size: 9.5, weight: .medium))
                             .foregroundStyle(Palette.ink3)
                     }
@@ -1292,21 +1292,21 @@ private struct EventComposeSheet: View {
                     .buttonStyle(PressableButtonStyle())
                 }
 
-                field(title: "活动名称", placeholder: "比如：白塔寺旧物市集", text: $title)
+                field(title: "Event name", placeholder: "e.g. Baita Temple flea market", text: $title)
 
                 HStack(spacing: 8) {
-                    field(title: "日期", placeholder: "11/08 周六", text: $date)
-                    field(title: "时间", placeholder: "18:00", text: $time)
+                    field(title: "Date", placeholder: "11/08 Sat", text: $date)
+                    field(title: "Time", placeholder: "18:00", text: $time)
                 }
 
-                field(title: "地点", placeholder: "钟鼓楼广场 · 集合点", text: $place)
-                field(title: "费用", placeholder: "免费 / ¥20 / AA", text: $fee)
+                field(title: "Place", placeholder: "Drum & Bell Towers square · Meet-up", text: $place)
+                field(title: "Fee", placeholder: "Free / ¥20 / split", text: $fee)
 
                 VStack(alignment: .leading, spacing: 5) {
-                    Eyebrow(text: "活动说明")
+                    Eyebrow(text: "ABOUT")
                     ZStack(alignment: .topLeading) {
                         if note.isEmpty {
-                            Text("说说玩什么、适合谁、需要带什么…")
+                            Text("What you'll do, who it's for, what to bring…")
                                 .font(.system(size: 11.5))
                                 .foregroundStyle(Palette.ink3)
                                 .padding(.horizontal, 16)
@@ -1328,7 +1328,7 @@ private struct EventComposeSheet: View {
                 HStack(spacing: 5) {
                     Image(systemName: "checkmark.shield")
                         .font(.system(size: 9, weight: .bold))
-                    Text("发布免费 · 审核通过后展示给社区")
+                    Text("Free to post · Shown after review")
                         .font(.system(size: 9, weight: .medium))
                         .foregroundStyle(Palette.ink3)
                 }
@@ -1343,7 +1343,7 @@ private struct EventComposeSheet: View {
                 model.publishEvent(title: title, date: date, time: time, place: place, fee: fee, note: note)
                 dismiss()
             } label: {
-                Text("发布到本地活动")
+                Text("Post to local events")
                     .font(.system(size: 12.5, weight: .bold))
                     .foregroundStyle(canPublish ? Palette.ink : Palette.ink3)
                     .frame(maxWidth: .infinity)
@@ -1378,7 +1378,7 @@ private struct EventComposeSheet: View {
             VStack(spacing: 1) {
                 Text(date.split(separator: " ").first.map(String.init) ?? date)
                     .font(.system(size: 11.5, weight: .black, design: .rounded))
-                Text("预览")
+                Text("Preview")
                     .font(.system(size: 6.5, weight: .bold, design: .monospaced))
                     .opacity(0.6)
             }
@@ -1388,20 +1388,20 @@ private struct EventComposeSheet: View {
             .overlay(RoundedRectangle(cornerRadius: 13, style: .continuous).strokeBorder(Palette.ink, lineWidth: 1))
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(title.isEmpty ? "你的活动名称" : title)
+                Text(title.isEmpty ? "Your event name" : title)
                     .font(.system(size: 11.5, weight: .bold))
                     .foregroundStyle(title.isEmpty ? Palette.ink3 : Palette.ink)
                     .lineLimit(1)
-                Text("\(time) · \(place.isEmpty ? "集合地点" : place)")
+                Text("\(time) · \(place.isEmpty ? "Meeting point" : place)")
                     .font(.system(size: 8.5, weight: .medium, design: .monospaced))
                     .foregroundStyle(Palette.ink3)
                     .lineLimit(1)
-                Text("@王博 · \(fee.isEmpty ? "免费" : fee)")
+                Text("@Wang Bo · \(fee.isEmpty ? "Free" : fee)")
                     .font(.system(size: 8.5, weight: .medium))
                     .foregroundStyle(Palette.ink2)
             }
             Spacer(minLength: 0)
-            TagView(text: "我发布", style: .accent)
+            TagView(text: "My post", style: .accent)
         }
         .padding(9)
         .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Palette.paper))

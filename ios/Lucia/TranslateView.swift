@@ -11,7 +11,7 @@ struct TranslateView: View {
                 header
                 SegmentedControl(
                     options: TranslateMode.allCases,
-                    title: { $0.title },
+                    title: { model.say($0.title) },
                     selection: $model.translateMode
                 )
                 switch model.translateMode {
@@ -47,14 +47,14 @@ struct TranslateView: View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 5) {
                 HStack(spacing: 6) {
-                    Eyebrow(text: "翻译 / TRANSLATE")
+                    Eyebrow(text: "TRANSLATE / PHRASES")
                     StickerLabel(text: "SAY IT", fill: Palette.lime, rotation: -3)
                 }
-                (Text("说清楚，\n") + Text("就不慌了").foregroundColor(Palette.accent))
+                (Text("Say it right,\n") + Text("stay calm").foregroundColor(Palette.accent))
                     .font(.system(size: 35, weight: .black))
                     .tracking(-0.6)
                     .lineSpacing(1)
-                Text("实时对话 · 离线语句 · 拍照即译")
+                Text("Live talk · Offline phrases · Camera translate")
                     .font(.system(size: 9.5, weight: .medium, design: .monospaced))
                     .foregroundStyle(Palette.ink2)
             }
@@ -63,7 +63,7 @@ struct TranslateView: View {
                 HStack(spacing: 4) {
                     Image(systemName: "wifi.slash")
                         .font(.system(size: 8, weight: .bold))
-                    Text("离线可用")
+                    Text("Offline ready")
                         .font(.system(size: 9, weight: .bold, design: .monospaced))
                 }
                 .foregroundStyle(Palette.ink)
@@ -71,7 +71,7 @@ struct TranslateView: View {
                 .padding(.vertical, 6)
                 .background(Capsule().fill(Palette.mint))
                 .overlay(Capsule().strokeBorder(Palette.ink, lineWidth: 1))
-                Text("86 句 · 4.2 MB")
+                Text("86 phrases · 4.2 MB")
                     .font(.system(size: 8.5, weight: .medium, design: .monospaced))
                     .foregroundStyle(Palette.ink2)
             }
@@ -87,9 +87,9 @@ struct TranslateView: View {
 
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
-                    Eyebrow(text: "实时对话", color: Palette.ink2)
+                    Eyebrow(text: "LIVE CONVERSATION", color: Palette.ink2)
                     Spacer()
-                    Text("\(model.liveMessages.count) 条")
+                    Text(verbatim: model.lang == .zh ? "\(model.liveMessages.count) 条" : "\(model.liveMessages.count) lines")
                         .font(.system(size: 9, weight: .semibold, design: .monospaced))
                         .foregroundStyle(Palette.ink3)
                 }
@@ -113,10 +113,10 @@ struct TranslateView: View {
         let flipped = model.languageFlipped
         return HStack(spacing: 10) {
             VStack(alignment: .leading, spacing: 3) {
-                Text(flipped ? "English" : "中文")
+                Text(verbatim: model.say(flipped ? "English" : "Chinese"))
                     .font(.system(size: 17, weight: .black))
                     .foregroundStyle(Palette.ink)
-                Text(flipped ? "English (US)" : "自动识别")
+                Text(verbatim: model.say(flipped ? "English (US)" : "Auto-detect"))
                     .font(.system(size: 9, weight: .medium, design: .monospaced))
                     .foregroundStyle(Palette.ink2)
             }
@@ -137,10 +137,10 @@ struct TranslateView: View {
             .buttonStyle(PressableButtonStyle())
             Spacer()
             VStack(alignment: .trailing, spacing: 3) {
-                Text(flipped ? "中文" : "English")
+                Text(verbatim: model.say(flipped ? "Chinese" : "English"))
                     .font(.system(size: 17, weight: .black))
                     .foregroundStyle(Palette.ink)
-                Text(flipped ? "自动识别" : "English (US)")
+                Text(verbatim: model.say(flipped ? "Auto-detect" : "English (US)"))
                     .font(.system(size: 9, weight: .medium, design: .monospaced))
                     .foregroundStyle(Palette.ink2)
             }
@@ -173,7 +173,7 @@ struct TranslateView: View {
             )
 
             HStack(spacing: 5) {
-                Text(message.isMine ? "我说" : "对方")
+                Text(verbatim: model.say(message.isMine ? "You" : "Them"))
                     .font(.system(size: 8, weight: .bold, design: .monospaced))
                     .foregroundStyle(Palette.ink3)
                 Button {
@@ -224,7 +224,7 @@ struct TranslateView: View {
             }
             .frame(height: 96)
 
-            Text(model.listening ? "正在听… 说完点一下结束" : "点一下开始说话")
+            Text(verbatim: model.say(model.listening ? "Listening… tap to stop" : "Tap to speak"))
                 .font(.system(size: 10, weight: .semibold, design: .monospaced))
                 .foregroundStyle(model.listening ? Palette.accent : Palette.ink2)
         }
@@ -236,7 +236,7 @@ struct TranslateView: View {
             ForEach(["地铁站怎么走？", "我对花生过敏", "请帮我叫车"], id: \.self) { phrase in
                 Button {
                     SpeechService.shared.speak(phrase)
-                    model.toast("正在播放 · \(phrase)", icon: "speaker.wave.2.fill")
+                    model.toast(model.lang == .zh ? "正在播放 · \(phrase)" : "Playing · \(phrase)", icon: "speaker.wave.2.fill")
                 } label: {
                     Text(phrase)
                         .font(.system(size: 9.5, weight: .semibold))
@@ -274,15 +274,15 @@ struct TranslateView: View {
                 .background(Circle().fill(Palette.mint))
                 .overlay(Circle().strokeBorder(Palette.ink, lineWidth: 1.1))
             VStack(alignment: .leading, spacing: 2) {
-                Text("离线语句库 · 已下载")
+                Text("Offline pack · Downloaded")
                     .font(.system(size: 12.5, weight: .bold))
                     .foregroundStyle(Palette.ink)
-                Text("没有网络也能用，出门前不用再准备。")
+                Text("Works without a network — nothing to prep before you go.")
                     .font(.system(size: 9.5, weight: .medium))
                     .foregroundStyle(Palette.ink2)
             }
             Spacer()
-            TagView(text: "86 句", style: .ok)
+            TagView(text: "86 phrases", style: .ok)
         }
         .padding(12)
         .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Palette.limeSoft))
@@ -312,9 +312,9 @@ struct TranslateView: View {
                     VStack(spacing: 6) {
                         Image(systemName: scenario.icon)
                             .font(.system(size: 16, weight: .bold))
-                        Text(scenario.title)
+                        Text(model.say(scenario.title))
                             .font(.system(size: 10.5, weight: .bold))
-                        Text("\(total) 句")
+                        Text(verbatim: model.lang == .zh ? "\(total) 句" : "\(total) phrases")
                             .font(.system(size: 8, weight: .medium, design: .monospaced))
                             .opacity(0.6)
                     }
@@ -341,11 +341,13 @@ struct TranslateView: View {
         let list = model.phrases.filter { $0.scenario == model.scenario }
         return VStack(spacing: 0) {
             HStack {
-                Text("\(model.scenario.title) · \(list.count) 句")
+                Text(verbatim: model.lang == .zh
+                    ? "\(model.say(model.scenario.title)) · \(list.count) 句"
+                    : "\(model.scenario.title) · \(list.count) phrases")
                     .font(.system(size: 12.5, weight: .bold))
                     .foregroundStyle(Palette.ink)
                 Spacer()
-                Text("点 Aa 放大给店员看")
+                Text("Tap Aa to show staff")
                     .font(.system(size: 8.5, weight: .medium, design: .monospaced))
                     .foregroundStyle(Palette.ink3)
             }
@@ -405,24 +407,24 @@ struct TranslateView: View {
                 Image(systemName: "exclamationmark.shield.fill")
                     .font(.system(size: 12, weight: .bold))
                     .foregroundStyle(Palette.warn)
-                Text("紧急情况")
+                Text("Emergency")
                     .font(.system(size: 12.5, weight: .bold))
                     .foregroundStyle(Palette.ink)
                 Spacer()
-                TagView(text: "全国通用", style: .warn)
+                TagView(text: "Nationwide", style: .warn)
             }
-            Text("急救 120 · 报警 110 · 国际 SOS 010-6462-9100")
+            Text("Ambulance 120 · Police 110 · SOS 010-6462-9100")
                 .font(.system(size: 10, weight: .medium))
                 .foregroundStyle(Palette.ink2)
 
             HStack(spacing: 8) {
                 Button {
-                    model.toast("正在拨打 120（演示）", icon: "phone.fill")
+                    model.toast(model.say("Calling 120 (demo)"), icon: "phone.fill")
                 } label: {
                     HStack(spacing: 5) {
                         Image(systemName: "phone.fill")
                             .font(.system(size: 9, weight: .bold))
-                        Text("拨打 120")
+                        Text("Call 120")
                             .font(.system(size: 10, weight: .bold))
                     }
                     .foregroundStyle(Palette.paper)
@@ -434,12 +436,12 @@ struct TranslateView: View {
                 .buttonStyle(PressableButtonStyle())
 
                 Button {
-                    model.toast("已准备酒店地址 · 出示给司机", icon: "location.fill")
+                    model.toast(model.say("Hotel address ready · Show the driver"), icon: "location.fill")
                 } label: {
                     HStack(spacing: 5) {
                         Image(systemName: "location.fill")
                             .font(.system(size: 9, weight: .bold))
-                        Text("给司机看地址")
+                        Text("Show driver address")
                             .font(.system(size: 10, weight: .bold))
                     }
                     .foregroundStyle(Palette.ink)
@@ -470,7 +472,7 @@ struct TranslateView: View {
 
     private var signItems: [(zh: String, en: String, price: String)] {
         [
-            ("南锣鼓巷", "Nanluoguxiang Alley", "北"),
+            ("南锣鼓巷", "Nanluoguxiang Alley", "N"),
             ("什刹海", "Shichahai Lake", "800m"),
             ("地铁 6 号线", "Metro Line 6", "→")
         ]
@@ -499,14 +501,14 @@ struct TranslateView: View {
                 Circle()
                     .fill(Palette.coral)
                     .frame(width: 6, height: 6)
-                Text("相机 · 自动识别中文")
+                Text("Camera · Chinese OCR")
                     .font(.system(size: 8.5, weight: .bold, design: .monospaced))
                     .foregroundStyle(Palette.paper)
                 Spacer()
                 HStack(spacing: 4) {
                     Image(systemName: model.photoScanning ? "text.viewfinder" : "viewfinder")
                         .font(.system(size: 8, weight: .bold))
-                    Text(model.photoScanning ? "识别中…" : "1×")
+                    Text(model.photoScanning ? "Scanning…" : "1×")
                         .font(.system(size: 8.5, weight: .bold, design: .monospaced))
                 }
                 .foregroundStyle(model.photoScanning ? Palette.lime : Palette.paper.opacity(0.7))
@@ -561,12 +563,12 @@ struct TranslateView: View {
                         Text("南锣小馆")
                             .font(.system(size: 13, weight: .black))
                             .foregroundStyle(Palette.ink)
-                        Text("NANLUO BISTRO · 菜单")
+                        Text("NANLUO BISTRO · MENU")
                             .font(.system(size: 6.5, weight: .semibold, design: .monospaced))
                             .foregroundStyle(Palette.ink3)
                     }
                     Spacer()
-                    Text("中 / EN")
+                    Text("ZH / EN")
                         .font(.system(size: 6, weight: .bold, design: .monospaced))
                         .foregroundStyle(Palette.ink)
                         .padding(.horizontal, 6)
@@ -736,7 +738,7 @@ struct TranslateView: View {
                     HStack(spacing: 4) {
                         Image(systemName: sample.icon)
                             .font(.system(size: 9, weight: .bold))
-                        Text(sample.title)
+                        Text(model.say(sample.title))
                             .font(.system(size: 9.5, weight: .bold))
                     }
                     .foregroundStyle(active ? Palette.paper : Palette.ink)
@@ -750,7 +752,9 @@ struct TranslateView: View {
 
             Spacer(minLength: 0)
 
-            Text(model.photoScanned ? "已译 \(photoRows.count) 段" : "放进取景框")
+            Text(verbatim: model.lang == .zh
+                ? (model.photoScanned ? "已翻译 \(photoRows.count) 行" : "对准文字")
+                : (model.photoScanned ? "\(photoRows.count) lines translated" : "Frame the text"))
                 .font(.system(size: 8.5, weight: .medium, design: .monospaced))
                 .foregroundStyle(Palette.ink3)
 
@@ -788,10 +792,10 @@ struct TranslateView: View {
         HStack(spacing: 10) {
             IconBadge(icon: "text.viewfinder", tint: Palette.ink, background: Palette.mustard, size: 36)
             VStack(alignment: .leading, spacing: 2) {
-                Text("拍菜单、路牌、手写纸条都可以")
+                Text("Menus, street signs, handwritten notes")
                     .font(.system(size: 11.5, weight: .bold))
                     .foregroundStyle(Palette.ink)
-                Text("按下快门，Lucia 会圈出文字并给出中英对照。")
+                Text("Tap the shutter — Pico highlights the text and pairs it with English.")
                     .font(.system(size: 9.5, weight: .medium))
                     .foregroundStyle(Palette.ink2)
             }
@@ -808,12 +812,12 @@ struct TranslateView: View {
     private var photoResultCard: some View {
         VStack(alignment: .leading, spacing: 9) {
             HStack(spacing: 7) {
-                Text("识别结果")
+                Text("Recognized text")
                     .font(.system(size: 12.5, weight: .bold))
                     .foregroundStyle(Palette.ink)
-                TagView(text: "中文 → EN", style: .ok)
+                TagView(text: "Chinese → EN", style: .ok)
                 Spacer()
-                Text("本地识别 · 0.8s")
+                Text("On-device · 0.8s")
                     .font(.system(size: 8, weight: .medium, design: .monospaced))
                     .foregroundStyle(Palette.ink3)
             }
@@ -853,12 +857,12 @@ struct TranslateView: View {
                 Button {
                     let text = photoRows.map { "\($0.zh)  \($0.en)" }.joined(separator: "\n")
                     UIPasteboard.general.string = text
-                    model.toast("已复制中英对照", icon: "doc.on.doc.fill")
+                    model.toast(model.say("Chinese and English copied"), icon: "doc.on.doc.fill")
                 } label: {
                     HStack(spacing: 5) {
                         Image(systemName: "doc.on.doc")
                             .font(.system(size: 9, weight: .bold))
-                        Text("复制全部")
+                        Text("Copy all")
                             .font(.system(size: 10, weight: .bold))
                     }
                     .foregroundStyle(Palette.ink)
@@ -876,7 +880,7 @@ struct TranslateView: View {
                     HStack(spacing: 5) {
                         Image(systemName: "speaker.wave.2.fill")
                             .font(.system(size: 9, weight: .bold))
-                        Text("念给我听")
+                        Text("Read it to me")
                             .font(.system(size: 10, weight: .bold))
                     }
                     .foregroundStyle(Palette.ink)
@@ -903,7 +907,7 @@ struct TranslateView: View {
         HStack(spacing: 5) {
             Image(systemName: "lock.fill")
                 .font(.system(size: 8, weight: .semibold))
-            Text("照片只在手机本地识别，不上传；返回即自动删除。")
+            Text("Photos are scanned on-device and never uploaded; they're deleted when you leave.")
                 .font(.system(size: 8.5, weight: .medium, design: .monospaced))
         }
         .foregroundStyle(Palette.ink3)
@@ -916,10 +920,10 @@ struct TranslateView: View {
         HStack(spacing: 10) {
             IconBadge(icon: "sparkles", tint: Palette.ink, background: Palette.lime, size: 36)
             VStack(alignment: .leading, spacing: 2) {
-                Text("表达不出来？让 Lucia 替你组织句子")
+                Text("Stuck for words? Let Pico build the sentence")
                     .font(.system(size: 11.5, weight: .bold))
                     .foregroundStyle(Palette.ink)
-                Text("说明场景，她会给出中英对照和发音。")
+                Text("Describe the moment — she'll give you both languages and how to say it.")
                     .font(.system(size: 9.5, weight: .medium))
                     .foregroundStyle(Palette.ink2)
             }
@@ -936,7 +940,7 @@ struct TranslateView: View {
         .dashedBorder(color: Palette.ink.opacity(0.5), radius: 19)
         .contentShape(Rectangle())
         .onTapGesture {
-            model.openAssistant("翻译 · 帮我组织一句话")
+            model.openAssistant("Translate · Help me phrase this")
         }
     }
 }

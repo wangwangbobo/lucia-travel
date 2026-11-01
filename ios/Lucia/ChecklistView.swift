@@ -40,10 +40,10 @@ struct ChecklistView: View {
                 dismiss()
             }
             Spacer()
-            Eyebrow(text: "行前清单 / PREP")
+            Eyebrow(text: "PREP / CHECKLIST")
             Spacer()
             Button {
-                model.openAssistant("清单 · 行前准备")
+                model.openAssistant("Checklist · Trip prep")
             } label: {
                 Image(systemName: "sparkles")
                     .font(.system(size: 13, weight: .bold))
@@ -53,7 +53,7 @@ struct ChecklistView: View {
                     .overlay(Circle().strokeBorder(Palette.ink, lineWidth: 1.2))
             }
             .buttonStyle(PressableButtonStyle())
-            .accessibilityLabel("问问 Lucia")
+            .accessibilityLabel("Ask Pico")
             ShareLink(item: model.checklistSummary) {
                 Image(systemName: "square.and.arrow.up")
                     .font(.system(size: 13, weight: .bold))
@@ -73,15 +73,15 @@ struct ChecklistView: View {
             }
             Group {
                 if model.remaining == 0 {
-                    Text("都准备好了")
+                    Text("All set")
                 } else {
-                    Text("还有 ") + Text("\(model.remaining) 件小事").foregroundColor(Palette.accent)
+                    Text("Just ") + Text("\(model.remaining) things left").foregroundColor(Palette.accent)
                 }
             }
             .font(.system(size: 34, weight: .black))
             .tracking(-0.7)
             .foregroundStyle(Palette.ink)
-            Text("按出发前和落地当天排好，做完打勾就行。")
+            Text("Ordered for before you fly and arrival day — just tick them off.")
                 .font(.system(size: 11, weight: .medium))
                 .foregroundStyle(Palette.ink2)
         }
@@ -92,14 +92,14 @@ struct ChecklistView: View {
         VStack(alignment: .leading, spacing: 13) {
             HStack(alignment: .center) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("出发进度")
+                    Text("Trip progress")
                         .font(.system(size: 9.5, weight: .bold, design: .monospaced))
                         .foregroundStyle(Palette.ink2)
                     HStack(alignment: .firstTextBaseline, spacing: 4) {
                         Text("\(model.doneCount)")
                             .font(.system(size: 38, weight: .black).width(.condensed))
                             .foregroundStyle(Palette.ink)
-                        Text("/ \(model.totalCount) 项")
+                        Text("/ \(model.totalCount) items")
                             .font(.system(size: 11, weight: .semibold))
                             .foregroundStyle(Palette.ink2)
                     }
@@ -119,7 +119,7 @@ struct ChecklistView: View {
             LinearProgressBar(progress: model.progress, tint: Palette.ink, track: Palette.paper.opacity(0.65))
 
             HStack(spacing: 8) {
-                Text("距出发 3 天 · 已按优先级排好")
+                Text("3 days to go · Sorted by priority")
                     .font(.system(size: 9.5, weight: .medium, design: .monospaced))
                     .foregroundStyle(Palette.ink2)
                 Spacer()
@@ -129,7 +129,7 @@ struct ChecklistView: View {
                     HStack(spacing: 4) {
                         Image(systemName: "sparkles")
                             .font(.system(size: 9, weight: .bold))
-                        Text("AI 复查")
+                        Text("AI recheck")
                             .font(.system(size: 10.5, weight: .bold))
                     }
                     .foregroundStyle(Palette.ink)
@@ -156,7 +156,7 @@ struct ChecklistView: View {
     private var categoryRow: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 7) {
-                Chip(title: "全部", selected: category == nil, count: "\(model.totalCount)") {
+                Chip(title: "All", selected: category == nil, count: "\(model.totalCount)") {
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
                         category = nil
                     }
@@ -189,7 +189,7 @@ struct ChecklistView: View {
                                 .foregroundStyle(Palette.ink3)
                             Spacer()
                             if phase == .before {
-                                Text("出发前 3 天")
+                                Text("3 days before")
                                     .font(.system(size: 9, weight: .bold, design: .monospaced))
                                     .foregroundStyle(Palette.accent)
                             }
@@ -299,17 +299,17 @@ struct ChecklistView: View {
             .overlay(Circle().strokeBorder(Palette.ink, lineWidth: 1.1))
 
             VStack(alignment: .leading, spacing: 3) {
-                Text("让 Lucia 再检查一遍")
+                Text("Have Pico check again")
                     .font(.system(size: 12.5, weight: .bold))
                     .foregroundStyle(Palette.ink)
-                Text("对照天气、闭馆日和余票，重排待办顺序。")
+                Text("She reorders tasks around weather, closing days and tickets left.")
                     .font(.system(size: 10, weight: .medium))
                     .foregroundStyle(Palette.ink2)
             }
             Spacer(minLength: 0)
 
             Button {
-                model.openAssistant("清单 · 帮我复查")
+                model.openAssistant("Checklist · Review for me")
             } label: {
                 Image(systemName: "arrow.right")
                     .font(.system(size: 11, weight: .black))
@@ -331,7 +331,7 @@ struct ChecklistView: View {
                 HStack(spacing: 5) {
                     Image(systemName: "square.and.arrow.up")
                         .font(.system(size: 10, weight: .bold))
-                    Text("分享清单")
+                    Text("Share list")
                         .font(.system(size: 11, weight: .semibold))
                 }
                 .foregroundStyle(Palette.ink)
@@ -342,12 +342,12 @@ struct ChecklistView: View {
             }
 
             Button {
-                model.toast("已生成新的行前清单", icon: "doc.badge.plus")
+                model.toast("New prep list ready", icon: "doc.badge.plus")
             } label: {
                 HStack(spacing: 5) {
                     Image(systemName: "arrow.clockwise")
                         .font(.system(size: 10, weight: .bold))
-                    Text("重新生成")
+                    Text("Regenerate")
                         .font(.system(size: 11, weight: .semibold))
                 }
                 .foregroundStyle(Palette.ink)
@@ -367,10 +367,10 @@ struct ChecklistView: View {
     }
 
     private func handleAction(_ item: ChecklistItem) {
-        if item.title.hasPrefix("故宫门票") {
+        if item.title.hasPrefix("Forbidden City tickets") {
             model.bookForbiddenCity()
         } else {
-            model.openAssistant("清单 · \(item.title)")
+            model.openAssistant("Checklist · \(item.title)")
         }
     }
 }
